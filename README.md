@@ -72,6 +72,7 @@ docker compose -f docker-compose.ollama.yml --profile cpu --profile setup up -d
 ```
 
 Wait for the model to download, then visit [http://localhost:3000](http://localhost:3000). Add more models with:
+
 ```bash
 docker compose -f docker-compose.ollama.yml exec ollama ollama pull llama3.1:8b
 ```
@@ -86,6 +87,7 @@ docker compose -f docker-compose.ollama.yml exec ollama ollama pull llama3.1:8b
 ### Option 4: Manual Setup
 
 **Requirements:**
+
 - [Bun](https://bun.sh/) runtime
 - PostgreSQL 12+ with [pgvector extension](https://github.com/pgvector/pgvector) (required for AI embeddings)
 
@@ -104,6 +106,7 @@ bun install
 You need PostgreSQL with the `vector` extension for embedding support. Choose one option:
 
 **Option A: Using Docker (Recommended)**
+
 ```bash
 # Start PostgreSQL with pgvector extension
 docker run --name simstudio-db \
@@ -114,6 +117,7 @@ docker run --name simstudio-db \
 ```
 
 **Option B: Manual Installation**
+
 - Install PostgreSQL 12+ and the pgvector extension
 - See [pgvector installation guide](https://github.com/pgvector/pgvector#installation)
 
@@ -125,6 +129,7 @@ cp .env.example .env  # Configure with required variables (DATABASE_URL, BETTER_
 ```
 
 Update your `.env` file with the database URL:
+
 ```bash
 DATABASE_URL="postgresql://postgres:your_password@localhost:5432/simstudio"
 ```
@@ -132,7 +137,7 @@ DATABASE_URL="postgresql://postgres:your_password@localhost:5432/simstudio"
 4. Set up the database:
 
 ```bash
-bunx drizzle-kit migrate 
+bunx drizzle-kit migrate
 ```
 
 5. Start the development servers:
@@ -148,11 +153,16 @@ This starts both the main Next.js application and the realtime socket server req
 **Alternative - run servers separately:**
 
 Next.js app (from project root):
+
 ```bash
 bun run dev
 ```
 
+登陆用户
+caoyacheng/112781Love!
+
 Realtime socket server (from `apps/sim` directory in a separate terminal):
+
 ```bash
 cd apps/sim
 bun run dev:sockets
