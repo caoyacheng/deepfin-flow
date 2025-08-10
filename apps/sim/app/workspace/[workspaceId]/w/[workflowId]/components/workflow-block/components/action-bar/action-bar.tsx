@@ -1,46 +1,65 @@
-import { ArrowLeftRight, ArrowUpDown, Circle, CircleOff, Copy, Trash2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/lib/utils'
-import { useUserPermissionsContext } from '@/app/workspace/[workspaceId]/providers/workspace-permissions-provider'
-import { useCollaborativeWorkflow } from '@/hooks/use-collaborative-workflow'
-import { useWorkflowStore } from '@/stores/workflows/workflow/store'
+import { useUserPermissionsContext } from "@/app/workspace/[workspaceId]/providers/workspace-permissions-provider";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useCollaborativeWorkflow } from "@/hooks/use-collaborative-workflow";
+import { cn } from "@/lib/utils";
+import { useWorkflowStore } from "@/stores/workflows/workflow/store";
+import {
+  ArrowLeftRight,
+  ArrowUpDown,
+  Circle,
+  CircleOff,
+  Copy,
+  Trash2,
+} from "lucide-react";
 
 interface ActionBarProps {
-  blockId: string
-  blockType: string
-  disabled?: boolean
+  blockId: string;
+  blockType: string;
+  disabled?: boolean;
 }
 
-export function ActionBar({ blockId, blockType, disabled = false }: ActionBarProps) {
+export function ActionBar({
+  blockId,
+  blockType,
+  disabled = false,
+}: ActionBarProps) {
   const {
     collaborativeRemoveBlock,
     collaborativeToggleBlockEnabled,
     collaborativeDuplicateBlock,
     collaborativeToggleBlockHandles,
-  } = useCollaborativeWorkflow()
-  const isEnabled = useWorkflowStore((state) => state.blocks[blockId]?.enabled ?? true)
+  } = useCollaborativeWorkflow();
+  const isEnabled = useWorkflowStore(
+    (state) => state.blocks[blockId]?.enabled ?? true
+  );
   const horizontalHandles = useWorkflowStore(
     (state) => state.blocks[blockId]?.horizontalHandles ?? false
-  )
-  const userPermissions = useUserPermissionsContext()
+  );
+  const userPermissions = useUserPermissionsContext();
 
-  const isStarterBlock = blockType === 'starter'
+  const isStarterBlock = blockType === "starter";
 
   const getTooltipMessage = (defaultMessage: string) => {
     if (disabled) {
-      return userPermissions.isOfflineMode ? 'Connection lost - please refresh' : 'Read-only mode'
+      return userPermissions.isOfflineMode
+        ? "连接已断开，请刷新"
+        : "只读模式";
     }
-    return defaultMessage
-  }
+    return defaultMessage;
+  };
 
   return (
     <div
       className={cn(
-        '-right-20 absolute top-0',
-        'flex flex-col items-center gap-2 p-2',
-        'rounded-md border border-gray-200 bg-background shadow-sm dark:border-gray-800',
-        'opacity-0 transition-opacity duration-200 group-hover:opacity-100'
+        "-right-20 absolute top-0",
+        "flex flex-col items-center gap-2 p-2",
+        "rounded-md border border-gray-200 bg-background shadow-sm dark:border-gray-800",
+        "opacity-0 transition-opacity duration-200 group-hover:opacity-100"
       )}
     >
       {/* <Tooltip>
@@ -63,21 +82,28 @@ export function ActionBar({ blockId, blockType, disabled = false }: ActionBarPro
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            variant='ghost'
-            size='sm'
+            variant="ghost"
+            size="sm"
             onClick={() => {
               if (!disabled) {
-                collaborativeToggleBlockEnabled(blockId)
+                collaborativeToggleBlockEnabled(blockId);
               }
             }}
-            className={cn('text-gray-500', disabled && 'cursor-not-allowed opacity-50')}
+            className={cn(
+              "text-gray-500",
+              disabled && "cursor-not-allowed opacity-50"
+            )}
             disabled={disabled}
           >
-            {isEnabled ? <Circle className='h-4 w-4' /> : <CircleOff className='h-4 w-4' />}
+            {isEnabled ? (
+              <Circle className="h-4 w-4" />
+            ) : (
+              <CircleOff className="h-4 w-4" />
+            )}
           </Button>
         </TooltipTrigger>
-        <TooltipContent side='right'>
-          {getTooltipMessage(isEnabled ? 'Disable Block' : 'Enable Block')}
+        <TooltipContent side="right">
+          {getTooltipMessage(isEnabled ? "禁用" : "启用")}
         </TooltipContent>
       </Tooltip>
 
@@ -85,45 +111,53 @@ export function ActionBar({ blockId, blockType, disabled = false }: ActionBarPro
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              variant='ghost'
-              size='sm'
+              variant="ghost"
+              size="sm"
               onClick={() => {
                 if (!disabled) {
-                  collaborativeDuplicateBlock(blockId)
+                  collaborativeDuplicateBlock(blockId);
                 }
               }}
-              className={cn('text-gray-500', disabled && 'cursor-not-allowed opacity-50')}
+              className={cn(
+                "text-gray-500",
+                disabled && "cursor-not-allowed opacity-50"
+              )}
               disabled={disabled}
             >
-              <Copy className='h-4 w-4' />
+              <Copy className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side='right'>{getTooltipMessage('Duplicate Block')}</TooltipContent>
+          <TooltipContent side="right">
+            {getTooltipMessage("复制模块")}
+          </TooltipContent>
         </Tooltip>
       )}
 
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
-            variant='ghost'
-            size='sm'
+            variant="ghost"
+            size="sm"
             onClick={() => {
               if (!disabled) {
-                collaborativeToggleBlockHandles(blockId)
+                collaborativeToggleBlockHandles(blockId);
               }
             }}
-            className={cn('text-gray-500', disabled && 'cursor-not-allowed opacity-50')}
+            className={cn(
+              "text-gray-500",
+              disabled && "cursor-not-allowed opacity-50"
+            )}
             disabled={disabled}
           >
             {horizontalHandles ? (
-              <ArrowLeftRight className='h-4 w-4' />
+              <ArrowLeftRight className="h-4 w-4" />
             ) : (
-              <ArrowUpDown className='h-4 w-4' />
+              <ArrowUpDown className="h-4 w-4" />
             )}
           </Button>
         </TooltipTrigger>
-        <TooltipContent side='right'>
-          {getTooltipMessage(horizontalHandles ? 'Vertical Ports' : 'Horizontal Ports')}
+        <TooltipContent side="right">
+          {getTooltipMessage(horizontalHandles ? "垂直端口" : "水平端口")}
         </TooltipContent>
       </Tooltip>
 
@@ -131,25 +165,27 @@ export function ActionBar({ blockId, blockType, disabled = false }: ActionBarPro
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              variant='ghost'
-              size='sm'
+              variant="ghost"
+              size="sm"
               onClick={() => {
                 if (!disabled) {
-                  collaborativeRemoveBlock(blockId)
+                  collaborativeRemoveBlock(blockId);
                 }
               }}
               className={cn(
-                'text-gray-500 hover:text-red-600',
-                disabled && 'cursor-not-allowed opacity-50'
+                "text-gray-500 hover:text-red-600",
+                disabled && "cursor-not-allowed opacity-50"
               )}
               disabled={disabled}
             >
-              <Trash2 className='h-4 w-4' />
+              <Trash2 className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side='right'>{getTooltipMessage('Delete Block')}</TooltipContent>
+          <TooltipContent side="right">
+            {getTooltipMessage("删除模块")}
+          </TooltipContent>
         </Tooltip>
       )}
     </div>
-  )
+  );
 }

@@ -18,7 +18,7 @@ export const StarterBlock: BlockConfig = {
       layout: 'full',
       options: [
         { label: '手动运行', id: 'manual' },
-        { label: '聊天', id: 'chat' },
+        { label: '对话', id: 'chat' },
       ],
       value: () => 'manual',
     },

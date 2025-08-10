@@ -70,10 +70,10 @@ export const AgentBlock: BlockConfig<AgentResponse> = {
   subBlocks: [
     {
       id: 'systemPrompt',
-      title: 'System Prompt',
+      title: '系统提示词',
       type: 'long-input',
       layout: 'full',
-      placeholder: 'Enter system prompt...',
+      placeholder: '输入系统提示词',
       rows: 5,
       wandConfig: {
         enabled: true,
@@ -134,10 +134,10 @@ Create a system prompt appropriately detailed for the request, using clear langu
     },
     {
       id: 'userPrompt',
-      title: 'User Prompt',
+      title: '用户提示词',
       type: 'long-input',
       layout: 'full',
-      placeholder: 'Enter context or user message...',
+      placeholder: '请输入上下文或用户消息',
       rows: 3,
     },
     {
@@ -150,10 +150,10 @@ Create a system prompt appropriately detailed for the request, using clear langu
     },
     {
       id: 'model',
-      title: 'Model',
+      title: '模型',
       type: 'combobox',
       layout: 'half',
-      placeholder: 'Type or select a model...',
+      placeholder: '输入或选择一个模型',
       required: true,
       options: () => {
         const ollamaModels = useOllamaStore.getState().models
@@ -215,7 +215,7 @@ Create a system prompt appropriately detailed for the request, using clear langu
       title: 'API Key',
       type: 'short-input',
       layout: 'full',
-      placeholder: 'Enter your API key',
+      placeholder: '输入 API key',
       password: true,
       connectionDroppable: false,
       required: true,
@@ -259,7 +259,7 @@ Create a system prompt appropriately detailed for the request, using clear langu
     },
     {
       id: 'tools',
-      title: 'Tools',
+      title: '工具',
       type: 'tool-input',
       layout: 'full',
     },
@@ -268,7 +268,7 @@ Create a system prompt appropriately detailed for the request, using clear langu
       title: 'Response Format',
       type: 'code',
       layout: 'full',
-      placeholder: 'Enter JSON schema...',
+      placeholder: '输入JSON各式',
       language: 'json',
       wandConfig: {
         enabled: true,
