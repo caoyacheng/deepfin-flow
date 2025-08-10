@@ -1,9 +1,9 @@
-import { createCipheriv, createDecipheriv, randomBytes } from 'crypto'
-import { type ClassValue, clsx } from 'clsx'
-import { nanoid } from 'nanoid'
-import { twMerge } from 'tailwind-merge'
 import { env } from '@/lib/env'
 import { createLogger } from '@/lib/logs/console/logger'
+import { type ClassValue, clsx } from 'clsx'
+import { createCipheriv, createDecipheriv, randomBytes } from 'crypto'
+import { nanoid } from 'nanoid'
+import { twMerge } from 'tailwind-merge'
 
 const logger = createLogger('Utils')
 
@@ -348,34 +348,37 @@ export const redactApiKeys = (obj: any): any => {
 /**
  * Validates a name by removing any characters that could cause issues
  * with variable references or node naming.
+ * Now supports Unicode characters including Chinese, Japanese, Korean, etc.
  *
  * @param name - The name to validate
  * @returns The validated name with invalid characters removed, trimmed, and collapsed whitespace
  */
 export function validateName(name: string): string {
   return name
-    .replace(/[^a-zA-Z0-9_\s]/g, '') // Remove invalid characters
+    .replace(/[^\p{L}\p{N}_\s\-\.]/gu, '') // Allow Unicode letters, numbers, underscore, space, hyphen, dot
     .replace(/\s+/g, ' ') // Collapse multiple spaces into single spaces
 }
 
 /**
  * Checks if a name contains invalid characters
+ * Now supports Unicode characters including Chinese, Japanese, Korean, etc.
  *
  * @param name - The name to check
  * @returns True if the name is valid, false otherwise
  */
 export function isValidName(name: string): boolean {
-  return /^[a-zA-Z0-9_\s]*$/.test(name)
+  return /^[\p{L}\p{N}_\s\-\.]*$/u.test(name)
 }
 
 /**
  * Gets a list of invalid characters in a name
+ * Now supports Unicode characters including Chinese, Japanese, Korean, etc.
  *
  * @param name - The name to check
  * @returns Array of invalid characters found
  */
 export function getInvalidCharacters(name: string): string[] {
-  const invalidChars = name.match(/[^a-zA-Z0-9_\s]/g)
+  const invalidChars = name.match(/[^\p{L}\p{N}_\s\-\.]/gu)
   return invalidChars ? [...new Set(invalidChars)] : []
 }
 

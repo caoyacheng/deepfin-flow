@@ -1,20 +1,20 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
-  cn,
-  convertScheduleOptionsToCron,
-  decryptSecret,
-  encryptSecret,
-  formatDate,
-  formatDateTime,
-  formatDuration,
-  formatTime,
-  generateApiKey,
-  getInvalidCharacters,
-  getTimezoneAbbreviation,
-  isValidName,
-  redactApiKeys,
-  validateName,
+    cn,
+    convertScheduleOptionsToCron,
+    decryptSecret,
+    encryptSecret,
+    formatDate,
+    formatDateTime,
+    formatDuration,
+    formatTime,
+    generateApiKey,
+    getInvalidCharacters,
+    getTimezoneAbbreviation,
+    isValidName,
+    redactApiKeys,
+    validateName,
 } from '@/lib/utils'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('crypto', () => ({
   createCipheriv: vi.fn().mockReturnValue({
@@ -345,7 +345,7 @@ describe('validateName', () => {
 
   it.concurrent('should handle mixed valid and invalid characters', () => {
     const result = validateName('my-workflow@2023!')
-    expect(result).toBe('myworkflow2023')
+    expect(result).toBe('my-workflow2023')
   })
 
   it.concurrent('should collapse multiple spaces into single spaces', () => {
@@ -357,6 +357,31 @@ describe('validateName', () => {
     const result = validateName('test@#$  name')
     expect(result).toBe('test name')
   })
+
+  it.concurrent('should support Unicode characters including Chinese', () => {
+    const result = validateName('测试工作流-123')
+    expect(result).toBe('测试工作流-123')
+  })
+
+  it.concurrent('should support Japanese characters', () => {
+    const result = validateName('テストワークフロー.123')
+    expect(result).toBe('テストワークフロー.123')
+  })
+
+  it.concurrent('should support Korean characters', () => {
+    const result = validateName('테스트워크플로우_123')
+    expect(result).toBe('테스트워크플로우_123')
+  })
+
+  it.concurrent('should support mixed languages', () => {
+    const result = validateName('Test测试123_workflow')
+    expect(result).toBe('Test测试123_workflow')
+  })
+
+  it.concurrent('should remove truly invalid characters while keeping Unicode', () => {
+    const result = validateName('测试@#$%工作流')
+    expect(result).toBe('测试工作流')
+  })
 })
 
 describe('isValidName', () => {
@@ -366,20 +391,33 @@ describe('isValidName', () => {
     expect(isValidName('test name')).toBe(true)
     expect(isValidName('TestName')).toBe(true)
     expect(isValidName('')).toBe(true)
+    expect(isValidName('test-name')).toBe(true)
+    expect(isValidName('test.name')).toBe(true)
   })
 
   it.concurrent('should return false for invalid names', () => {
     expect(isValidName('test@name')).toBe(false)
-    expect(isValidName('test-name')).toBe(false)
     expect(isValidName('test#name')).toBe(false)
     expect(isValidName('test$name')).toBe(false)
     expect(isValidName('test%name')).toBe(false)
+  })
+
+  it.concurrent('should support Unicode characters including Chinese', () => {
+    expect(isValidName('测试工作流')).toBe(true)
+    expect(isValidName('テストワークフロー')).toBe(true)
+    expect(isValidName('테스트워크플로우')).toBe(true)
+    expect(isValidName('Test测试123_workflow')).toBe(true)
   })
 })
 
 describe('getInvalidCharacters', () => {
   it.concurrent('should return empty array for valid names', () => {
     const result = getInvalidCharacters('test_name_123')
+    expect(result).toEqual([])
+  })
+
+  it.concurrent('should return empty array for valid Unicode names', () => {
+    const result = getInvalidCharacters('测试工作流-123')
     expect(result).toEqual([])
   })
 
@@ -400,6 +438,11 @@ describe('getInvalidCharacters', () => {
 
   it.concurrent('should handle string with only invalid characters', () => {
     const result = getInvalidCharacters('@#$%')
+    expect(result).toEqual(['@', '#', '$', '%'])
+  })
+
+  it.concurrent('should handle mixed valid Unicode and invalid characters', () => {
+    const result = getInvalidCharacters('测试@#$%工作流')
     expect(result).toEqual(['@', '#', '$', '%'])
   })
 })

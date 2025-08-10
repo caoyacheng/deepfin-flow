@@ -1,11 +1,11 @@
-import { StartIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { StartIcon } from '@/components/icons'
 
 export const StarterBlock: BlockConfig = {
   type: 'starter',
   name: 'Starter',
   description: 'Start workflow',
-  longDescription: 'Initiate your workflow manually with optional structured input for API calls.',
+  longDescription: '通过手动启动工作流，可为 API 调用提供可选的结构化输入。',
   category: 'blocks',
   bgColor: '#2FB3FF',
   icon: StartIcon,
@@ -13,19 +13,19 @@ export const StarterBlock: BlockConfig = {
     // Main trigger selector
     {
       id: 'startWorkflow',
-      title: 'Start Workflow',
+      title: '启动工作流',
       type: 'dropdown',
       layout: 'full',
       options: [
-        { label: 'Run manually', id: 'manual' },
-        { label: 'Chat', id: 'chat' },
+        { label: '手动运行', id: 'manual' },
+        { label: '聊天', id: 'chat' },
       ],
       value: () => 'manual',
     },
     // Structured Input format - visible if manual run is selected (advanced mode)
     {
       id: 'inputFormat',
-      title: 'Input Format (for API calls)',
+      title: '输入格式（用于 API 调用）',
       type: 'input-format',
       layout: 'full',
       mode: 'advanced',
