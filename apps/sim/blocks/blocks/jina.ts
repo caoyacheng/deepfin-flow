@@ -1,5 +1,5 @@
-import { JinaAIIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { JinaAIIcon } from '@/components/icons'
 import type { ReadUrlResponse } from '@/tools/jina/types'
 
 export const JinaBlock: BlockConfig<ReadUrlResponse> = {
@@ -12,6 +12,7 @@ export const JinaBlock: BlockConfig<ReadUrlResponse> = {
   category: 'tools',
   bgColor: '#333333',
   icon: JinaAIIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'url',

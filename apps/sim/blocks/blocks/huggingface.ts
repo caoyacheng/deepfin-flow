@@ -1,5 +1,5 @@
-import { HuggingFaceIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { HuggingFaceIcon } from '@/components/icons'
 import type { HuggingFaceChatResponse } from '@/tools/huggingface/types'
 
 export const HuggingFaceBlock: BlockConfig<HuggingFaceChatResponse> = {
@@ -12,6 +12,7 @@ export const HuggingFaceBlock: BlockConfig<HuggingFaceChatResponse> = {
   category: 'tools',
   bgColor: '#0B0F19',
   icon: HuggingFaceIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'systemPrompt',

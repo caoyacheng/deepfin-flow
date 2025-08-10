@@ -1,5 +1,5 @@
-import { LinearIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { LinearIcon } from '@/components/icons'
 import type { LinearResponse } from '@/tools/linear/types'
 
 export const LinearBlock: BlockConfig<LinearResponse> = {
@@ -10,6 +10,7 @@ export const LinearBlock: BlockConfig<LinearResponse> = {
     'Integrate with Linear to fetch, filter, and create issues directly from your workflow.',
   category: 'tools',
   icon: LinearIcon,
+  hideFromToolbar: true, //隐藏工具栏
   bgColor: '#5E6AD2',
   subBlocks: [
     {

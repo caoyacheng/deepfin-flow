@@ -1,5 +1,5 @@
-import { MicrosoftPlannerIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { MicrosoftPlannerIcon } from '@/components/icons'
 import type { MicrosoftPlannerResponse } from '@/tools/microsoft_planner/types'
 
 interface MicrosoftPlannerBlockParams {
@@ -25,6 +25,7 @@ export const MicrosoftPlannerBlock: BlockConfig<MicrosoftPlannerResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: MicrosoftPlannerIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'operation',

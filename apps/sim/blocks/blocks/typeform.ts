@@ -1,5 +1,5 @@
-import { TypeformIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { TypeformIcon } from '@/components/icons'
 import type { TypeformResponse } from '@/tools/typeform/types'
 
 export const TypeformBlock: BlockConfig<TypeformResponse> = {
@@ -12,6 +12,7 @@ export const TypeformBlock: BlockConfig<TypeformResponse> = {
   category: 'tools',
   bgColor: '#262627', // Typeform brand color
   icon: TypeformIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'operation',

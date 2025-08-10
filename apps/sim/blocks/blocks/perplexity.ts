@@ -1,5 +1,5 @@
-import { PerplexityIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { PerplexityIcon } from '@/components/icons'
 import type { PerplexityChatResponse } from '@/tools/perplexity/types'
 
 export const PerplexityBlock: BlockConfig<PerplexityChatResponse> = {
@@ -12,6 +12,7 @@ export const PerplexityBlock: BlockConfig<PerplexityChatResponse> = {
   category: 'tools',
   bgColor: '#20808D', // Perplexity turquoise color
   icon: PerplexityIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'systemPrompt',

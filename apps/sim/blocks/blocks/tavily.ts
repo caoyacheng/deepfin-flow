@@ -1,5 +1,5 @@
-import { TavilyIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { TavilyIcon } from '@/components/icons'
 import type { TavilyResponse } from '@/tools/tavily/types'
 
 export const TavilyBlock: BlockConfig<TavilyResponse> = {
@@ -12,6 +12,7 @@ export const TavilyBlock: BlockConfig<TavilyResponse> = {
   docsLink: 'https://docs.sim.ai/tools/tavily',
   bgColor: '#0066FF',
   icon: TavilyIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'operation',

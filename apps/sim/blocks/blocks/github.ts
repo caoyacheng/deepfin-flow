@@ -1,5 +1,5 @@
-import { GithubIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { GithubIcon } from '@/components/icons'
 import type { GitHubResponse } from '@/tools/github/types'
 
 export const GitHubBlock: BlockConfig<GitHubResponse> = {
@@ -12,6 +12,7 @@ export const GitHubBlock: BlockConfig<GitHubResponse> = {
   category: 'tools',
   bgColor: '#181C1E',
   icon: GithubIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'operation',

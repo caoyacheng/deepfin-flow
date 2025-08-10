@@ -1,5 +1,5 @@
-import { GoogleSheetsIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { GoogleSheetsIcon } from '@/components/icons'
 import type { GoogleSheetsResponse } from '@/tools/google_sheets/types'
 
 export const GoogleSheetsBlock: BlockConfig<GoogleSheetsResponse> = {
@@ -12,6 +12,7 @@ export const GoogleSheetsBlock: BlockConfig<GoogleSheetsResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: GoogleSheetsIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     // Operation selector
     {

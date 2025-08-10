@@ -1,5 +1,5 @@
-import { RedditIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { RedditIcon } from '@/components/icons'
 import type { RedditResponse } from '@/tools/reddit/types'
 
 export const RedditBlock: BlockConfig<RedditResponse> = {
@@ -12,6 +12,7 @@ export const RedditBlock: BlockConfig<RedditResponse> = {
   category: 'tools',
   bgColor: '#FF5700',
   icon: RedditIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     // Operation selection
     {

@@ -1,5 +1,5 @@
-import { StagehandIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { StagehandIcon } from '@/components/icons'
 import type { StagehandAgentResponse } from '@/tools/stagehand/types'
 
 export const StagehandAgentBlock: BlockConfig<StagehandAgentResponse> = {
@@ -12,6 +12,7 @@ export const StagehandAgentBlock: BlockConfig<StagehandAgentResponse> = {
   category: 'tools',
   bgColor: '#FFC83C',
   icon: StagehandIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'startUrl',

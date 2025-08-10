@@ -1,5 +1,5 @@
-import { DiscordIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { DiscordIcon } from '@/components/icons'
 import type { DiscordResponse } from '@/tools/discord/types'
 
 export const DiscordBlock: BlockConfig<DiscordResponse> = {
@@ -11,6 +11,7 @@ export const DiscordBlock: BlockConfig<DiscordResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: DiscordIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'operation',

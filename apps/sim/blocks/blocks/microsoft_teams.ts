@@ -1,5 +1,5 @@
-import { MicrosoftTeamsIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { MicrosoftTeamsIcon } from '@/components/icons'
 import type { MicrosoftTeamsResponse } from '@/tools/microsoft_teams/types'
 
 export const MicrosoftTeamsBlock: BlockConfig<MicrosoftTeamsResponse> = {
@@ -12,6 +12,7 @@ export const MicrosoftTeamsBlock: BlockConfig<MicrosoftTeamsResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: MicrosoftTeamsIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'operation',

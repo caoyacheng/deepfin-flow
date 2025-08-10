@@ -1,5 +1,5 @@
-import { SlackIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { SlackIcon } from '@/components/icons'
 import type { SlackResponse } from '@/tools/slack/types'
 
 export const SlackBlock: BlockConfig<SlackResponse> = {
@@ -12,6 +12,7 @@ export const SlackBlock: BlockConfig<SlackResponse> = {
   category: 'tools',
   bgColor: '#611f69',
   icon: SlackIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'operation',

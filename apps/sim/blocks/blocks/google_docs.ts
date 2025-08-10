@@ -1,5 +1,5 @@
-import { GoogleDocsIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { GoogleDocsIcon } from '@/components/icons'
 import type { GoogleDocsResponse } from '@/tools/google_docs/types'
 
 export const GoogleDocsBlock: BlockConfig<GoogleDocsResponse> = {
@@ -12,6 +12,7 @@ export const GoogleDocsBlock: BlockConfig<GoogleDocsResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: GoogleDocsIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     // Operation selector
     {

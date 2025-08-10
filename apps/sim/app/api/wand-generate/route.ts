@@ -1,8 +1,8 @@
+import { env } from '@/lib/env'
+import { createLogger } from '@/lib/logs/console/logger'
 import { unstable_noStore as noStore } from 'next/cache'
 import { type NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
-import { env } from '@/lib/env'
-import { createLogger } from '@/lib/logs/console/logger'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'edge'
@@ -10,14 +10,30 @@ export const maxDuration = 60
 
 const logger = createLogger('WandGenerateAPI')
 
+// Initialize OpenRouter client (OpenAI-compatible API)
+const openrouter = env.OPENROUTER_API_KEY
+  ? new OpenAI({
+      baseURL: 'https://openrouter.ai/api/v1',
+      apiKey: env.OPENROUTER_API_KEY,
+      defaultHeaders: {
+        'HTTP-Referer': 'http://localhost:3000', // Optional: for OpenRouter rankings
+        'X-Title': 'SimStudio', // Optional: for OpenRouter rankings
+      },
+    })
+  : null
+
+// Fallback to OpenAI if OpenRouter is not configured
 const openai = env.OPENAI_API_KEY
   ? new OpenAI({
       apiKey: env.OPENAI_API_KEY,
     })
   : null
 
-if (!env.OPENAI_API_KEY) {
-  logger.warn('OPENAI_API_KEY not found. Wand generation API will not function.')
+// Use OpenRouter as primary, OpenAI as fallback
+const client = openrouter || openai
+
+if (!env.OPENROUTER_API_KEY && !env.OPENAI_API_KEY) {
+  logger.warn('Neither OPENROUTER_API_KEY nor OPENAI_API_KEY found. Wand generation API will not function.')
 }
 
 interface ChatMessage {
@@ -38,8 +54,8 @@ export async function POST(req: NextRequest) {
   const requestId = crypto.randomUUID().slice(0, 8)
   logger.info(`[${requestId}] Received wand generation request`)
 
-  if (!openai) {
-    logger.error(`[${requestId}] OpenAI client not initialized. Missing API key.`)
+  if (!client) {
+    logger.error(`[${requestId}] AI client not initialized. Missing API key.`)
     return NextResponse.json(
       { success: false, error: 'Wand generation service is not configured.' },
       { status: 503 }
@@ -82,8 +98,8 @@ export async function POST(req: NextRequest) {
     // For streaming responses
     if (stream) {
       try {
-        const streamCompletion = await openai?.chat.completions.create({
-          model: 'gpt-4o',
+        const streamCompletion = await client.chat.completions.create({
+          model: 'openai/gpt-5', // OpenRouter model format
           messages: messages,
           temperature: 0.3,
           max_tokens: 10000,
@@ -141,8 +157,8 @@ export async function POST(req: NextRequest) {
     }
 
     // For non-streaming responses
-    const completion = await openai?.chat.completions.create({
-      model: 'gpt-4o',
+    const completion = await client.chat.completions.create({
+      model: 'openai/gpt-5', // OpenRouter model format
       messages: messages,
       temperature: 0.3,
       max_tokens: 10000,

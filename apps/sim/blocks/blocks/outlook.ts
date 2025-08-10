@@ -1,5 +1,5 @@
-import { OutlookIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { OutlookIcon } from '@/components/icons'
 import type { OutlookResponse } from '@/tools/outlook/types'
 
 export const OutlookBlock: BlockConfig<OutlookResponse> = {
@@ -12,6 +12,7 @@ export const OutlookBlock: BlockConfig<OutlookResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: OutlookIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'operation',

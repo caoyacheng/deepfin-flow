@@ -1,5 +1,5 @@
-import { SerperIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { SerperIcon } from '@/components/icons'
 import type { SearchResponse } from '@/tools/serper/types'
 
 export const SerperBlock: BlockConfig<SearchResponse> = {
@@ -12,6 +12,7 @@ export const SerperBlock: BlockConfig<SearchResponse> = {
   category: 'tools',
   bgColor: '#2B3543',
   icon: SerperIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'query',

@@ -1,5 +1,5 @@
-import { TelegramIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { TelegramIcon } from '@/components/icons'
 import type { TelegramMessageResponse } from '@/tools/telegram/types'
 
 export const TelegramBlock: BlockConfig<TelegramMessageResponse> = {
@@ -12,6 +12,7 @@ export const TelegramBlock: BlockConfig<TelegramMessageResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: TelegramIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'botToken',

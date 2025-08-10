@@ -1,5 +1,5 @@
-import { WhatsAppIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { WhatsAppIcon } from '@/components/icons'
 import type { WhatsAppResponse } from '@/tools/whatsapp/types'
 
 export const WhatsAppBlock: BlockConfig<WhatsAppResponse> = {
@@ -12,6 +12,7 @@ export const WhatsAppBlock: BlockConfig<WhatsAppResponse> = {
   category: 'tools',
   bgColor: '#25D366',
   icon: WhatsAppIcon,
+  hideFromToolbar: true,//隐藏工具栏
   subBlocks: [
     {
       id: 'phoneNumber',

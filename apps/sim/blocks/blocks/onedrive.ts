@@ -1,5 +1,5 @@
-import { MicrosoftOneDriveIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { MicrosoftOneDriveIcon } from '@/components/icons'
 import type { OneDriveResponse } from '@/tools/onedrive/types'
 
 export const OneDriveBlock: BlockConfig<OneDriveResponse> = {
@@ -12,6 +12,7 @@ export const OneDriveBlock: BlockConfig<OneDriveResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: MicrosoftOneDriveIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     // Operation selector
     {

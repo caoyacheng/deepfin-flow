@@ -1,5 +1,5 @@
-import { MicrosoftExcelIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { MicrosoftExcelIcon } from '@/components/icons'
 import type { MicrosoftExcelResponse } from '@/tools/microsoft_excel/types'
 
 export const MicrosoftExcelBlock: BlockConfig<MicrosoftExcelResponse> = {
@@ -12,6 +12,7 @@ export const MicrosoftExcelBlock: BlockConfig<MicrosoftExcelResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: MicrosoftExcelIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'operation',

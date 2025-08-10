@@ -1,5 +1,5 @@
-import { YouTubeIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { YouTubeIcon } from '@/components/icons'
 import type { YouTubeSearchResponse } from '@/tools/youtube/types'
 
 export const YouTubeBlock: BlockConfig<YouTubeSearchResponse> = {
@@ -12,6 +12,7 @@ export const YouTubeBlock: BlockConfig<YouTubeSearchResponse> = {
   category: 'tools',
   bgColor: '#FF0000',
   icon: YouTubeIcon,
+  hideFromToolbar: true,  // 添加这一行就可以隐藏该工具
   subBlocks: [
     {
       id: 'query',

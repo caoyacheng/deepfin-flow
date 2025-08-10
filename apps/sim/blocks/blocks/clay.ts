@@ -1,5 +1,5 @@
-import { ClayIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { ClayIcon } from '@/components/icons'
 import type { ClayPopulateResponse } from '@/tools/clay/types'
 
 export const ClayBlock: BlockConfig<ClayPopulateResponse> = {
@@ -12,6 +12,7 @@ export const ClayBlock: BlockConfig<ClayPopulateResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: ClayIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'webhookURL',

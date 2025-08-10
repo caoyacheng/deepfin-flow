@@ -110,9 +110,9 @@ You need PostgreSQL with the `vector` extension for embedding support. Choose on
 ```bash
 # Start PostgreSQL with pgvector extension
 docker run --name simstudio-db \
-  -e POSTGRES_PASSWORD=your_password \
+  -e POSTGRES_PASSWORD=123456 \
   -e POSTGRES_DB=simstudio \
-  -p 5432:5432 -d \
+  -p 5433:5432 -d \
   pgvector/pgvector:pg17
 ```
 

@@ -1,5 +1,5 @@
-import { MicrosoftSharepointIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { MicrosoftSharepointIcon } from '@/components/icons'
 import type { SharepointResponse } from '@/tools/sharepoint/types'
 
 export const SharepointBlock: BlockConfig<SharepointResponse> = {
@@ -12,6 +12,7 @@ export const SharepointBlock: BlockConfig<SharepointResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: MicrosoftSharepointIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     // Operation selector
     {

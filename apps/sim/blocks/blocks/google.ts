@@ -1,5 +1,5 @@
-import { GoogleIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { GoogleIcon } from '@/components/icons'
 import type { GoogleSearchResponse } from '@/tools/google/types'
 
 export const GoogleSearchBlock: BlockConfig<GoogleSearchResponse> = {
@@ -12,6 +12,7 @@ export const GoogleSearchBlock: BlockConfig<GoogleSearchResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: GoogleIcon,
+  hideFromToolbar: true, //隐藏工具栏
 
   subBlocks: [
     {

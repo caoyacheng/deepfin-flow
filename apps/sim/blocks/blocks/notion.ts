@@ -1,5 +1,5 @@
-import { NotionIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { NotionIcon } from '@/components/icons'
 import type { NotionResponse } from '@/tools/notion/types'
 
 export const NotionBlock: BlockConfig<NotionResponse> = {
@@ -12,6 +12,7 @@ export const NotionBlock: BlockConfig<NotionResponse> = {
   category: 'tools',
   bgColor: '#181C1E',
   icon: NotionIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'operation',

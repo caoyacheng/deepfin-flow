@@ -1,5 +1,5 @@
-import { WikipediaIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { WikipediaIcon } from '@/components/icons'
 import type { WikipediaResponse } from '@/tools/wikipedia/types'
 
 export const WikipediaBlock: BlockConfig<WikipediaResponse> = {
@@ -12,6 +12,7 @@ export const WikipediaBlock: BlockConfig<WikipediaResponse> = {
   category: 'tools',
   bgColor: '#000000',
   icon: WikipediaIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'operation',

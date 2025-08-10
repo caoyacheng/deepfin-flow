@@ -1,5 +1,5 @@
-import { TwilioIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { TwilioIcon } from '@/components/icons'
 import type { TwilioSMSBlockOutput } from '@/tools/twilio/types'
 
 export const TwilioSMSBlock: BlockConfig<TwilioSMSBlockOutput> = {
@@ -10,6 +10,7 @@ export const TwilioSMSBlock: BlockConfig<TwilioSMSBlockOutput> = {
   category: 'tools',
   bgColor: '#F22F46', // Twilio brand color
   icon: TwilioIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'phoneNumbers',

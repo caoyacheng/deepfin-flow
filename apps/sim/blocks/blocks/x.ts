@@ -1,5 +1,5 @@
-import { xIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { xIcon } from '@/components/icons'
 import type { XResponse } from '@/tools/x/types'
 
 export const XBlock: BlockConfig<XResponse> = {
@@ -12,6 +12,7 @@ export const XBlock: BlockConfig<XResponse> = {
   category: 'tools',
   bgColor: '#000000', // X's black color
   icon: xIcon,
+  hideFromToolbar: true,
   subBlocks: [
     {
       id: 'operation',

@@ -1,5 +1,5 @@
-import { GoogleDriveIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { GoogleDriveIcon } from '@/components/icons'
 import type { GoogleDriveResponse } from '@/tools/google_drive/types'
 
 export const GoogleDriveBlock: BlockConfig<GoogleDriveResponse> = {
@@ -12,6 +12,7 @@ export const GoogleDriveBlock: BlockConfig<GoogleDriveResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: GoogleDriveIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     // Operation selector
     {

@@ -1,5 +1,5 @@
-import { StagehandIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { StagehandIcon } from '@/components/icons'
 import type { ToolResponse } from '@/tools/types'
 
 export interface StagehandExtractResponse extends ToolResponse {
@@ -18,6 +18,7 @@ export const StagehandBlock: BlockConfig<StagehandExtractResponse> = {
   category: 'tools',
   bgColor: '#FFC83C',
   icon: StagehandIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'url',

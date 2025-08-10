@@ -1,5 +1,5 @@
-import { JiraIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { JiraIcon } from '@/components/icons'
 import type { JiraResponse } from '@/tools/jira/types'
 
 export const JiraBlock: BlockConfig<JiraResponse> = {
@@ -12,6 +12,7 @@ export const JiraBlock: BlockConfig<JiraResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: JiraIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'operation',

@@ -1,5 +1,5 @@
-import { GoogleCalendarIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { GoogleCalendarIcon } from '@/components/icons'
 import type { GoogleCalendarResponse } from '@/tools/google_calendar/types'
 
 export const GoogleCalendarBlock: BlockConfig<GoogleCalendarResponse> = {
@@ -12,6 +12,7 @@ export const GoogleCalendarBlock: BlockConfig<GoogleCalendarResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: GoogleCalendarIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'operation',

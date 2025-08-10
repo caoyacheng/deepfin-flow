@@ -1,5 +1,5 @@
-import { WealthboxIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { WealthboxIcon } from '@/components/icons'
 import type { WealthboxResponse } from '@/tools/wealthbox/types'
 
 export const WealthboxBlock: BlockConfig<WealthboxResponse> = {
@@ -12,6 +12,7 @@ export const WealthboxBlock: BlockConfig<WealthboxResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: WealthboxIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'operation',

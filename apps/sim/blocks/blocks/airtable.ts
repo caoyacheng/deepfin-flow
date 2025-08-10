@@ -1,5 +1,5 @@
-import { AirtableIcon } from '@/components/icons'
 import type { BlockConfig } from '@/blocks/types'
+import { AirtableIcon } from '@/components/icons'
 import type { AirtableResponse } from '@/tools/airtable/types'
 
 export const AirtableBlock: BlockConfig<AirtableResponse> = {
@@ -14,6 +14,7 @@ export const AirtableBlock: BlockConfig<AirtableResponse> = {
   category: 'tools',
   bgColor: '#E0E0E0',
   icon: AirtableIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: 'operation',
