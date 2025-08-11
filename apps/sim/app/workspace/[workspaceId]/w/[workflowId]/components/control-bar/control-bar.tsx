@@ -478,7 +478,7 @@ export function ControlBar({ hasValidationErrors = false }: ControlBarProps) {
                 )}
               >
                 <Trash2 className="h-5 w-5" />
-                <span className="sr-only">Delete Workflow</span>
+                <span className="sr-only">删除工作流</span>
               </Button>
             </AlertDialogTrigger>
           </TooltipTrigger>
@@ -487,24 +487,23 @@ export function ControlBar({ hasValidationErrors = false }: ControlBarProps) {
 
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete workflow?</AlertDialogTitle>
+            <AlertDialogTitle>删除工作流？</AlertDialogTitle>
             <AlertDialogDescription>
-              Deleting this workflow will permanently remove all associated
-              blocks, executions, and configuration.{" "}
+              删除此工作流将永久移除所有相关的区块、执行记录和配置。{" "}
               <span className="text-red-500 dark:text-red-500">
-                This action cannot be undone.
+                此操作无法撤销。
               </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex">
             <AlertDialogCancel className="h-9 w-full rounded-[8px]">
-              Cancel
+              取消
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteWorkflow}
               className="h-9 w-full rounded-[8px] bg-red-500 text-white transition-all duration-200 hover:bg-red-600 dark:bg-red-500 dark:hover:bg-red-600"
             >
-              Delete
+              删除
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

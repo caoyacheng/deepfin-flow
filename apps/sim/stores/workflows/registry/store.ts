@@ -599,7 +599,7 @@ export const useWorkflowRegistry = create<WorkflowRegistry>()(
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               name: options.name || generateCreativeWorkflowName(),
-              description: options.description || "New workflow",
+              description: options.description || "新工作流",
               color: options.marketplaceId ? "#808080" : getNextWorkflowColor(),
               workspaceId,
               folderId: options.folderId || null,
@@ -609,7 +609,7 @@ export const useWorkflowRegistry = create<WorkflowRegistry>()(
           if (!response.ok) {
             const errorData = await response.json();
             throw new Error(
-              `Failed to create workflow: ${errorData.error || response.statusText}`
+              `创建工作流失败: ${errorData.error || response.statusText}`
             );
           }
 
