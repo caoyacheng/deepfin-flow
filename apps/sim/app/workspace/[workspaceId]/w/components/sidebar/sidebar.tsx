@@ -1031,7 +1031,7 @@ export function Sidebar() {
                 strokeWidth={2}
               />
               <span className="flex h-8 flex-1 items-center px-0 text-muted-foreground text-sm leading-none">
-                Search anything
+                搜索
               </span>
               <KeyboardShortcut shortcut={getKeyboardShortcutText("K", true)} />
             </button>

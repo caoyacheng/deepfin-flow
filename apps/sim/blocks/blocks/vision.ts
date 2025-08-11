@@ -5,9 +5,8 @@ import type { VisionResponse } from "@/tools/vision/types";
 export const VisionBlock: BlockConfig<VisionResponse> = {
   type: "vision",
   name: "图片分析",
-  description: "Analyze images with vision models",
-  longDescription:
-    "Process visual content with customizable prompts to extract insights and information from images.",
+  description: "使用视觉模型分析图片",
+  longDescription: "使用自定义提示处理视觉内容，从图片中提取见解和信息。",
   docsLink: "https://docs.sim.ai/tools/vision",
   category: "tools",
   bgColor: "#4D5FFF",

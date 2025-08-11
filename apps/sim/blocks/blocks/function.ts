@@ -5,9 +5,9 @@ import type { CodeExecutionOutput } from "@/tools/function/types";
 export const FunctionBlock: BlockConfig<CodeExecutionOutput> = {
   type: "function",
   name: "函数",
-  description: "Run custom logic",
+  description: "运行自定义逻辑",
   longDescription:
-    "Execute custom JavaScript or TypeScript code within your workflow to transform data or implement complex logic. Create reusable functions to process inputs and generate outputs for other blocks.",
+    "在工作流中运行自定义的 JavaScript 或 TypeScript 代码，用于转换数据或实现复杂逻辑。创建可重用的函数来处理输入并生成输出，以供其他块使用。",
   docsLink: "https://docs.sim.ai/blocks/function",
   category: "blocks",
   bgColor: "#FF402F",

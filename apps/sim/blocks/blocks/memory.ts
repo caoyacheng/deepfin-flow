@@ -4,9 +4,9 @@ import { BrainIcon } from "@/components/icons";
 export const MemoryBlock: BlockConfig = {
   type: "memory",
   name: "记忆",
-  description: "Add memory store",
+  description: "添加记忆存储",
   longDescription:
-    "Create persistent storage for data that needs to be accessed across multiple workflow steps. Store and retrieve information throughout your workflow execution to maintain context and state.",
+    "创建持久化存储，用于存储需要在多个工作流步骤中访问的数据。在工作流执行过程中存储和检索信息，以维护上下文和状态。",
   bgColor: "#F64F9E",
   icon: BrainIcon,
   category: "blocks",

@@ -596,7 +596,7 @@ export function SearchModal({
           <div className="flex items-center border-b px-6 py-2">
             <Search className="h-5 w-5 font-sans text-muted-foreground text-xl" />
             <Input
-              placeholder="Search anything"
+              placeholder="搜索任何内容"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="!font-[300] !text-lg placeholder:!text-lg border-0 bg-transparent font-sans text-muted-foreground leading-10 tracking-normal placeholder:text-muted-foreground focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -614,7 +614,7 @@ export function SearchModal({
               {filteredBlocks.length > 0 && (
                 <div>
                   <h3 className="mb-3 ml-6 font-normal font-sans text-muted-foreground text-sm leading-none tracking-normal">
-                    Blocks
+                    模块
                   </h3>
                   <div
                     ref={(el) => {
@@ -660,7 +660,7 @@ export function SearchModal({
               {filteredTools.length > 0 && (
                 <div>
                   <h3 className="mb-3 ml-6 font-normal font-sans text-muted-foreground text-sm leading-none tracking-normal">
-                    Tools
+                    工具
                   </h3>
                   <div
                     ref={(el) => {
@@ -706,7 +706,7 @@ export function SearchModal({
               {(loading || filteredTemplates.length > 0) && (
                 <div>
                   <h3 className="mb-3 ml-6 font-normal font-sans text-muted-foreground text-sm leading-none tracking-normal">
-                    Templates
+                    模板
                   </h3>
                   <div
                     ref={(el) => {
@@ -758,7 +758,7 @@ export function SearchModal({
                   {filteredWorkspaces.length > 0 && (
                     <div className="mb-6">
                       <h3 className="mb-3 ml-6 font-normal font-sans text-muted-foreground text-sm leading-none tracking-normal">
-                        Workspaces
+                        工作空间
                       </h3>
                       <div className="space-y-1 px-6">
                         {filteredWorkspaces.map((workspace, workspaceIndex) => {
@@ -796,7 +796,7 @@ export function SearchModal({
                   {filteredWorkflows.length > 0 && (
                     <div className="mb-6">
                       <h3 className="mb-3 ml-6 font-normal font-sans text-muted-foreground text-sm leading-none tracking-normal">
-                        Workflows
+                        工作流
                       </h3>
                       <div className="space-y-1 px-6">
                         {filteredWorkflows.map((workflow, workflowIndex) => {
@@ -835,7 +835,7 @@ export function SearchModal({
                   {filteredPages.length > 0 && (
                     <div className="mb-6">
                       <h3 className="mb-3 ml-6 font-normal font-sans text-muted-foreground text-sm leading-none tracking-normal">
-                        Pages
+                        文件
                       </h3>
                       <div className="space-y-1 px-6">
                         {filteredPages.map((page, pageIndex) => {
@@ -874,7 +874,7 @@ export function SearchModal({
                   {filteredDocs.length > 0 && (
                     <div>
                       <h3 className="mb-3 ml-6 font-normal font-sans text-muted-foreground text-sm leading-none tracking-normal">
-                        Docs
+                        文档
                       </h3>
                       <div className="space-y-1 px-6">
                         {filteredDocs.map((doc, docIndex) => {

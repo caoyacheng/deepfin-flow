@@ -215,7 +215,7 @@ async function createWorkspace(userId: string, name: string) {
         id: starterId,
         workflowId: workflowId,
         type: "starter",
-        name: "Start",
+        name: "开始",
         positionX: "100",
         positionY: "100",
         enabled: true,

@@ -162,9 +162,9 @@ const generateResponseFormat = (metrics: Metric[]) => {
 export const EvaluatorBlock: BlockConfig<EvaluatorResponse> = {
   type: "evaluator",
   name: "评估",
-  description: "Evaluate content",
+  description: "评估内容",
   longDescription:
-    "Assess content quality using customizable evaluation metrics and scoring criteria. Create objective evaluation frameworks with numeric scoring to measure performance across multiple dimensions.",
+    "使用可自定义的评估指标和评分标准对内容质量进行评估。创建客观的评估框架，使用数值评分来衡量在多个维度上的性能。",
   docsLink: "https://docs.sim.ai/blocks/evaluator",
   category: "tools",
   bgColor: "#4D5FFF",

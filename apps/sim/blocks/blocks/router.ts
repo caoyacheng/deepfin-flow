@@ -104,9 +104,9 @@ Remember: Your response must be ONLY the block ID - no additional text, formatti
 export const RouterBlock: BlockConfig<RouterResponse> = {
   type: "router",
   name: "路由",
-  description: "Route workflow",
+  description: "根据输入分析智能路由工作流",
   longDescription:
-    "Intelligently direct workflow execution to different paths based on input analysis. Use AI to determine the most appropriate next step in your workflow based on content, intent, or specific criteria.",
+    "根据输入分析智能路由工作流，根据输入内容、意图或特定标准确定最适当的下一个步骤。",
   docsLink: "https://docs.sim.ai/blocks/router",
   category: "blocks",
   bgColor: "#28C43F",

@@ -84,7 +84,7 @@ export function CreateMenu({
   // Action handlers
   const handleCreateWorkflow = useCallback(async () => {
     if (isCreatingWorkflow) {
-      logger.info("Workflow creation already in progress, ignoring request");
+      logger.info("创建工作流已在进行中，忽略请求");
       return;
     }
 
@@ -96,7 +96,7 @@ export function CreateMenu({
         router.push(`/workspace/${workspaceId}/w/${workflowId}`);
       }
     } catch (error) {
-      logger.error("Error creating workflow:", { error });
+      logger.error("创建工作流失败:", { error });
     }
   }, [onCreateWorkflow, isCreatingWorkflow, router, workspaceId]);
 
@@ -135,7 +135,7 @@ export function CreateMenu({
           parseWorkflowYaml(content);
 
         if (!yamlWorkflow || parseErrors.length > 0) {
-          logger.error("Failed to parse YAML:", { errors: parseErrors });
+          logger.error("解析YAML失败:", { errors: parseErrors });
           return;
         }
 
@@ -155,7 +155,7 @@ export function CreateMenu({
         // Create a new workflow
         const newWorkflowId = await createWorkflow({
           name: getWorkflowName(),
-          description: "Workflow imported from YAML",
+          description: "从YAML导入的工作流",
           workspaceId,
         });
 
@@ -176,7 +176,7 @@ export function CreateMenu({
 
         if (!response.ok) {
           const errorData = await response.json();
-          logger.error("Import failed:", {
+          logger.error("导入失败:", {
             message:
               errorData.message ||
               `HTTP ${response.status}: ${response.statusText}`,
@@ -188,14 +188,14 @@ export function CreateMenu({
 
         // Navigate to the new workflow AFTER import is complete
         if (result.success) {
-          logger.info("Navigating to imported workflow");
+          logger.info("导航到导入的工作流");
           router.push(`/workspace/${workspaceId}/w/${newWorkflowId}`);
-          logger.info("YAML import completed successfully");
+          logger.info("YAML导入完成");
         } else {
-          logger.error("Import failed:", { errors: result.errors || [] });
+          logger.error("导入失败:", { errors: result.errors || [] });
         }
       } catch (error) {
-        logger.error("Failed to import YAML workflow:", { error });
+        logger.error("导入YAML工作流失败:", { error });
       } finally {
         setIsImporting(false);
       }
@@ -219,7 +219,7 @@ export function CreateMenu({
         // Import directly with filename
         await handleDirectImport(content, file.name);
       } catch (error) {
-        logger.error("Failed to read file:", { error });
+        logger.error("读取文件失败:", { error });
       }
 
       // Reset file input
@@ -313,7 +313,7 @@ export function CreateMenu({
             variant="ghost"
             size="icon"
             className="h-8 w-8 shrink-0 rounded-[8px] border bg-background shadow-xs hover:bg-muted focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-            title="Create Workflow (Hover, right-click, or long press for more options)"
+            title="创建工作流 (悬停、右键点击或长按以获取更多选项)"
             disabled={isCreatingWorkflow}
             onClick={handleButtonClick}
             onContextMenu={handleContextMenu}
@@ -378,7 +378,7 @@ export function CreateMenu({
             >
               <Upload className={iconClassName} />
               <span className={textClassName}>
-                {isImporting ? "Importing..." : "Import workflow"}
+                {isImporting ? "导入中..." : "导入工作流"}
               </span>
             </button>
           )}

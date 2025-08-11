@@ -17,9 +17,9 @@ Only return the translated text without any explanations or notes. The translati
 export const TranslateBlock: BlockConfig = {
   type: "translate",
   name: "翻译",
-  description: "Translate text to any language",
+  description: "将文本翻译成任何语言",
   longDescription:
-    "Convert text between languages while preserving meaning, nuance, and formatting. Utilize powerful language models to produce natural, fluent translations with appropriate cultural adaptations.",
+    "将文本翻译成任何语言，同时保留原始的含义、细微差别和格式。利用强大的语言模型，产生自然、流畅的翻译，同时适应适当的文化差异。",
   docsLink: "https://docs.sim.ai/tools/translate",
   category: "tools",
   bgColor: "#FF4B4B",

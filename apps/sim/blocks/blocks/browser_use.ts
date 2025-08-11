@@ -5,9 +5,9 @@ import type { BrowserUseResponse } from "@/tools/browser_use/types";
 export const BrowserUseBlock: BlockConfig<BrowserUseResponse> = {
   type: "browser_use",
   name: "浏览器",
-  description: "Run browser automation tasks",
+  description: "使用浏览器执行自动化任务",
   longDescription:
-    "Execute browser automation tasks with BrowserUse to navigate the web, scrape data, and perform actions as if a real user was interacting with the browser. The task runs asynchronously and the block will poll for completion before returning results.",
+    "使用 BrowserUse 执行浏览器自动化任务，导航网页、抓取数据和模拟用户与浏览器的交互。任务异步运行，块将在返回结果前轮询完成。",
   docsLink: "https://docs.sim.ai/tools/browser_use",
   category: "tools",
   bgColor: "#E0E0E0",
