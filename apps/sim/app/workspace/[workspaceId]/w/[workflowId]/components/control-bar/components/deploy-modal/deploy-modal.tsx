@@ -1,58 +1,64 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { Loader2, X } from 'lucide-react'
-import { Button, Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui'
-import { getEnv } from '@/lib/env'
-import { createLogger } from '@/lib/logs/console/logger'
-import { cn } from '@/lib/utils'
 import {
   DeployForm,
   DeploymentInfo,
-} from '@/app/workspace/[workspaceId]/w/[workflowId]/components/control-bar/components/deploy-modal/components'
-import { ChatDeploy } from '@/app/workspace/[workspaceId]/w/[workflowId]/components/control-bar/components/deploy-modal/components/chat-deploy/chat-deploy'
-import { useWorkflowRegistry } from '@/stores/workflows/registry/store'
-import { useSubBlockStore } from '@/stores/workflows/subblock/store'
-import { useWorkflowStore } from '@/stores/workflows/workflow/store'
-import type { WorkflowState } from '@/stores/workflows/workflow/types'
+} from "@/app/workspace/[workspaceId]/w/[workflowId]/components/control-bar/components/deploy-modal/components";
+import { ChatDeploy } from "@/app/workspace/[workspaceId]/w/[workflowId]/components/control-bar/components/deploy-modal/components/chat-deploy/chat-deploy";
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui";
+import { getEnv } from "@/lib/env";
+import { createLogger } from "@/lib/logs/console/logger";
+import { cn } from "@/lib/utils";
+import { useWorkflowRegistry } from "@/stores/workflows/registry/store";
+import { useSubBlockStore } from "@/stores/workflows/subblock/store";
+import { useWorkflowStore } from "@/stores/workflows/workflow/store";
+import type { WorkflowState } from "@/stores/workflows/workflow/types";
+import { Loader2, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
-const logger = createLogger('DeployModal')
+const logger = createLogger("DeployModal");
 
 interface DeployModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  workflowId: string | null
-  needsRedeployment: boolean
-  setNeedsRedeployment: (value: boolean) => void
-  deployedState: WorkflowState
-  isLoadingDeployedState: boolean
-  refetchDeployedState: () => Promise<void>
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  workflowId: string | null;
+  needsRedeployment: boolean;
+  setNeedsRedeployment: (value: boolean) => void;
+  deployedState: WorkflowState;
+  isLoadingDeployedState: boolean;
+  refetchDeployedState: () => Promise<void>;
 }
 
 interface ApiKey {
-  id: string
-  name: string
-  key: string
-  lastUsed?: string
-  createdAt: string
-  expiresAt?: string
+  id: string;
+  name: string;
+  key: string;
+  lastUsed?: string;
+  createdAt: string;
+  expiresAt?: string;
 }
 
 interface WorkflowDeploymentInfo {
-  isDeployed: boolean
-  deployedAt?: string
-  apiKey: string
-  endpoint: string
-  exampleCommand: string
-  needsRedeployment: boolean
+  isDeployed: boolean;
+  deployedAt?: string;
+  apiKey: string;
+  endpoint: string;
+  exampleCommand: string;
+  needsRedeployment: boolean;
 }
 
 interface DeployFormValues {
-  apiKey: string
-  newKeyName?: string
+  apiKey: string;
+  newKeyName?: string;
 }
 
-type TabView = 'api' | 'chat'
+type TabView = "api" | "chat";
 
 export function DeployModal({
   open,
@@ -66,138 +72,147 @@ export function DeployModal({
 }: DeployModalProps) {
   const deploymentStatus = useWorkflowRegistry((state) =>
     state.getWorkflowDeploymentStatus(workflowId)
-  )
-  const isDeployed = deploymentStatus?.isDeployed || false
-  const setDeploymentStatus = useWorkflowRegistry((state) => state.setDeploymentStatus)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isUndeploying, setIsUndeploying] = useState(false)
-  const [deploymentInfo, setDeploymentInfo] = useState<WorkflowDeploymentInfo | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
-  const [keysLoaded, setKeysLoaded] = useState(false)
-  const [activeTab, setActiveTab] = useState<TabView>('api')
-  const [chatSubmitting, setChatSubmitting] = useState(false)
-  const [apiDeployError, setApiDeployError] = useState<string | null>(null)
-  const [chatExists, setChatExists] = useState(false)
-  const [isChatFormValid, setIsChatFormValid] = useState(false)
+  );
+  const isDeployed = deploymentStatus?.isDeployed || false;
+  const setDeploymentStatus = useWorkflowRegistry(
+    (state) => state.setDeploymentStatus
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUndeploying, setIsUndeploying] = useState(false);
+  const [deploymentInfo, setDeploymentInfo] =
+    useState<WorkflowDeploymentInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+  const [keysLoaded, setKeysLoaded] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabView>("api");
+  const [chatSubmitting, setChatSubmitting] = useState(false);
+  const [apiDeployError, setApiDeployError] = useState<string | null>(null);
+  const [chatExists, setChatExists] = useState(false);
+  const [isChatFormValid, setIsChatFormValid] = useState(false);
 
   const getInputFormatExample = () => {
-    let inputFormatExample = ''
+    let inputFormatExample = "";
     try {
-      const blocks = Object.values(useWorkflowStore.getState().blocks)
-      const starterBlock = blocks.find((block) => block.type === 'starter')
+      const blocks = Object.values(useWorkflowStore.getState().blocks);
+      const starterBlock = blocks.find((block) => block.type === "starter");
 
       if (starterBlock) {
-        const inputFormat = useSubBlockStore.getState().getValue(starterBlock.id, 'inputFormat')
+        const inputFormat = useSubBlockStore
+          .getState()
+          .getValue(starterBlock.id, "inputFormat");
 
-        if (inputFormat && Array.isArray(inputFormat) && inputFormat.length > 0) {
-          const exampleData: Record<string, any> = {}
+        if (
+          inputFormat &&
+          Array.isArray(inputFormat) &&
+          inputFormat.length > 0
+        ) {
+          const exampleData: Record<string, any> = {};
           inputFormat.forEach((field: any) => {
             if (field.name) {
               switch (field.type) {
-                case 'string':
-                  exampleData[field.name] = 'example'
-                  break
-                case 'number':
-                  exampleData[field.name] = 42
-                  break
-                case 'boolean':
-                  exampleData[field.name] = true
-                  break
-                case 'object':
-                  exampleData[field.name] = { key: 'value' }
-                  break
-                case 'array':
-                  exampleData[field.name] = [1, 2, 3]
-                  break
+                case "string":
+                  exampleData[field.name] = "example";
+                  break;
+                case "number":
+                  exampleData[field.name] = 42;
+                  break;
+                case "boolean":
+                  exampleData[field.name] = true;
+                  break;
+                case "object":
+                  exampleData[field.name] = { key: "value" };
+                  break;
+                case "array":
+                  exampleData[field.name] = [1, 2, 3];
+                  break;
               }
             }
-          })
+          });
 
-          inputFormatExample = ` -d '${JSON.stringify(exampleData)}'`
+          inputFormatExample = ` -d '${JSON.stringify(exampleData)}'`;
         }
       }
     } catch (error) {
-      logger.error('Error generating input format example:', error)
+      logger.error("Error generating input format example:", error);
     }
 
-    return inputFormatExample
-  }
+    return inputFormatExample;
+  };
 
   const fetchApiKeys = async () => {
-    if (!open) return
+    if (!open) return;
 
     try {
-      setKeysLoaded(false)
-      const response = await fetch('/api/users/me/api-keys')
+      setKeysLoaded(false);
+      const response = await fetch("/api/users/me/api-keys");
 
       if (response.ok) {
-        const data = await response.json()
-        setApiKeys(data.keys || [])
-        setKeysLoaded(true)
+        const data = await response.json();
+        setApiKeys(data.keys || []);
+        setKeysLoaded(true);
       }
     } catch (error) {
-      logger.error('Error fetching API keys:', { error })
-      setKeysLoaded(true)
+      logger.error("Error fetching API keys:", { error });
+      setKeysLoaded(true);
     }
-  }
+  };
 
   const fetchChatDeploymentInfo = async () => {
-    if (!open || !workflowId) return
+    if (!open || !workflowId) return;
 
     try {
-      setIsLoading(true)
-      const response = await fetch(`/api/workflows/${workflowId}/chat/status`)
+      setIsLoading(true);
+      const response = await fetch(`/api/workflows/${workflowId}/chat/status`);
 
       if (response.ok) {
-        const data = await response.json()
+        const data = await response.json();
         if (data.isDeployed && data.deployment) {
-          setChatExists(true)
+          setChatExists(true);
         } else {
-          setChatExists(false)
+          setChatExists(false);
         }
       } else {
-        setChatExists(false)
+        setChatExists(false);
       }
     } catch (error) {
-      logger.error('Error fetching chat deployment info:', { error })
-      setChatExists(false)
+      logger.error("Error fetching chat deployment info:", { error });
+      setChatExists(false);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (open) {
-      setIsLoading(true)
-      fetchApiKeys()
-      fetchChatDeploymentInfo()
-      setActiveTab('api')
+      setIsLoading(true);
+      fetchApiKeys();
+      fetchChatDeploymentInfo();
+      setActiveTab("api");
     }
-  }, [open, workflowId])
+  }, [open, workflowId]);
 
   useEffect(() => {
     async function fetchDeploymentInfo() {
       if (!open || !workflowId || !isDeployed) {
-        setDeploymentInfo(null)
+        setDeploymentInfo(null);
         if (!open) {
-          setIsLoading(false)
+          setIsLoading(false);
         }
-        return
+        return;
       }
 
       try {
-        setIsLoading(true)
+        setIsLoading(true);
 
-        const response = await fetch(`/api/workflows/${workflowId}/deploy`)
+        const response = await fetch(`/api/workflows/${workflowId}/deploy`);
 
         if (!response.ok) {
-          throw new Error('Failed to fetch deployment information')
+          throw new Error("Failed to fetch deployment information");
         }
 
-        const data = await response.json()
-        const endpoint = `${getEnv('NEXT_PUBLIC_APP_URL')}/api/workflows/${workflowId}/execute`
-        const inputFormatExample = getInputFormatExample()
+        const data = await response.json();
+        const endpoint = `${getEnv("NEXT_PUBLIC_APP_URL")}/api/workflows/${workflowId}/execute`;
+        const inputFormatExample = getInputFormatExample();
 
         setDeploymentInfo({
           isDeployed: data.isDeployed,
@@ -206,54 +221,56 @@ export function DeployModal({
           endpoint,
           exampleCommand: `curl -X POST -H "X-API-Key: ${data.apiKey}" -H "Content-Type: application/json"${inputFormatExample} ${endpoint}`,
           needsRedeployment,
-        })
+        });
       } catch (error) {
-        logger.error('Error fetching deployment info:', { error })
+        logger.error("Error fetching deployment info:", { error });
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
 
-    fetchDeploymentInfo()
-  }, [open, workflowId, isDeployed, needsRedeployment])
+    fetchDeploymentInfo();
+  }, [open, workflowId, isDeployed, needsRedeployment]);
 
   const onDeploy = async (data: DeployFormValues) => {
-    setApiDeployError(null)
+    setApiDeployError(null);
 
     try {
-      setIsSubmitting(true)
+      setIsSubmitting(true);
 
       const response = await fetch(`/api/workflows/${workflowId}/deploy`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           apiKey: data.apiKey,
           deployChatEnabled: false,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to deploy workflow')
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to deploy workflow");
       }
 
-      const { isDeployed: newDeployStatus, deployedAt } = await response.json()
+      const { isDeployed: newDeployStatus, deployedAt } = await response.json();
 
       setDeploymentStatus(
         workflowId,
         newDeployStatus,
         deployedAt ? new Date(deployedAt) : undefined,
         data.apiKey
-      )
+      );
 
-      setNeedsRedeployment(false)
+      setNeedsRedeployment(false);
       if (workflowId) {
-        useWorkflowRegistry.getState().setWorkflowNeedsRedeployment(workflowId, false)
+        useWorkflowRegistry
+          .getState()
+          .setWorkflowNeedsRedeployment(workflowId, false);
       }
-      const endpoint = `${getEnv('NEXT_PUBLIC_APP_URL')}/api/workflows/${workflowId}/execute`
-      const inputFormatExample = getInputFormatExample()
+      const endpoint = `${getEnv("NEXT_PUBLIC_APP_URL")}/api/workflows/${workflowId}/execute`;
+      const inputFormatExample = getInputFormatExample();
 
       const newDeploymentInfo = {
         isDeployed: true,
@@ -262,167 +279,186 @@ export function DeployModal({
         endpoint,
         exampleCommand: `curl -X POST -H "X-API-Key: ${data.apiKey}" -H "Content-Type: application/json"${inputFormatExample} ${endpoint}`,
         needsRedeployment: false,
-      }
+      };
 
-      setDeploymentInfo(newDeploymentInfo)
+      setDeploymentInfo(newDeploymentInfo);
 
-      await refetchDeployedState()
+      await refetchDeployedState();
     } catch (error: any) {
-      logger.error('Error deploying workflow:', { error })
+      logger.error("Error deploying workflow:", { error });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleUndeploy = async () => {
     try {
-      setIsUndeploying(true)
+      setIsUndeploying(true);
 
       const response = await fetch(`/api/workflows/${workflowId}/deploy`, {
-        method: 'DELETE',
-      })
+        method: "DELETE",
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to undeploy workflow')
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to undeploy workflow");
       }
 
-      setDeploymentStatus(workflowId, false)
-      setChatExists(false)
-      onOpenChange(false)
+      setDeploymentStatus(workflowId, false);
+      setChatExists(false);
+      onOpenChange(false);
     } catch (error: any) {
-      logger.error('Error undeploying workflow:', { error })
+      logger.error("Error undeploying workflow:", { error });
     } finally {
-      setIsUndeploying(false)
+      setIsUndeploying(false);
     }
-  }
+  };
 
   const handleRedeploy = async () => {
     try {
-      setIsSubmitting(true)
+      setIsSubmitting(true);
 
       const response = await fetch(`/api/workflows/${workflowId}/deploy`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           deployChatEnabled: false,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to redeploy workflow')
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to redeploy workflow");
       }
 
-      const { isDeployed: newDeployStatus, deployedAt, apiKey } = await response.json()
+      const {
+        isDeployed: newDeployStatus,
+        deployedAt,
+        apiKey,
+      } = await response.json();
 
       setDeploymentStatus(
         workflowId,
         newDeployStatus,
         deployedAt ? new Date(deployedAt) : undefined,
         apiKey
-      )
+      );
 
-      setNeedsRedeployment(false)
+      setNeedsRedeployment(false);
       if (workflowId) {
-        useWorkflowRegistry.getState().setWorkflowNeedsRedeployment(workflowId, false)
+        useWorkflowRegistry
+          .getState()
+          .setWorkflowNeedsRedeployment(workflowId, false);
       }
 
-      await refetchDeployedState()
+      await refetchDeployedState();
     } catch (error: any) {
-      logger.error('Error redeploying workflow:', { error })
+      logger.error("Error redeploying workflow:", { error });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleCloseModal = () => {
-    setIsSubmitting(false)
-    setChatSubmitting(false)
-    onOpenChange(false)
-  }
+    setIsSubmitting(false);
+    setChatSubmitting(false);
+    onOpenChange(false);
+  };
 
   const handleWorkflowPreDeploy = async () => {
     if (!isDeployed) {
       const response = await fetch(`/api/workflows/${workflowId}/deploy`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           deployApiEnabled: true,
           deployChatEnabled: false,
         }),
-      })
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to deploy workflow')
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to deploy workflow");
       }
 
-      const { isDeployed: newDeployStatus, deployedAt, apiKey } = await response.json()
+      const {
+        isDeployed: newDeployStatus,
+        deployedAt,
+        apiKey,
+      } = await response.json();
 
       setDeploymentStatus(
         workflowId,
         newDeployStatus,
         deployedAt ? new Date(deployedAt) : undefined,
         apiKey
-      )
+      );
 
-      setDeploymentInfo((prev) => (prev ? { ...prev, apiKey } : null))
+      setDeploymentInfo((prev) => (prev ? { ...prev, apiKey } : null));
     }
-  }
+  };
 
   const handleChatFormSubmit = () => {
-    const form = document.getElementById('chat-deploy-form') as HTMLFormElement
+    const form = document.getElementById("chat-deploy-form") as HTMLFormElement;
     if (form) {
       // Check if we're in success view and need to trigger update
-      const updateTrigger = form.querySelector('[data-update-trigger]') as HTMLButtonElement
+      const updateTrigger = form.querySelector(
+        "[data-update-trigger]"
+      ) as HTMLButtonElement;
       if (updateTrigger) {
-        updateTrigger.click()
+        updateTrigger.click();
       } else {
-        form.requestSubmit()
+        form.requestSubmit();
       }
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleCloseModal}>
       <DialogContent
-        className='flex max-h-[78vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[600px]'
+        className="flex max-h-[78vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[600px]"
         hideCloseButton
       >
-        <DialogHeader className='flex-shrink-0 border-b px-6 py-4'>
-          <div className='flex items-center justify-between'>
-            <DialogTitle className='font-medium text-lg'>Deploy Workflow</DialogTitle>
-            <Button variant='ghost' size='icon' className='h-8 w-8 p-0' onClick={handleCloseModal}>
-              <X className='h-4 w-4' />
-              <span className='sr-only'>Close</span>
+        <DialogHeader className="flex-shrink-0 border-b px-6 py-4">
+          <div className="flex items-center justify-between">
+            <DialogTitle className="font-medium text-lg">
+              部署工作流
+            </DialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 p-0"
+              onClick={handleCloseModal}
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
             </Button>
           </div>
         </DialogHeader>
 
-        <div className='flex flex-1 flex-col overflow-hidden'>
-          <div className='flex h-14 flex-none items-center border-b px-6'>
-            <div className='flex gap-2'>
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <div className="flex h-14 flex-none items-center border-b px-6">
+            <div className="flex gap-2">
               <button
-                onClick={() => setActiveTab('api')}
+                onClick={() => setActiveTab("api")}
                 className={`rounded-md px-3 py-1 text-sm transition-colors ${
-                  activeTab === 'api'
-                    ? 'bg-accent text-foreground'
-                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                  activeTab === "api"
+                    ? "bg-accent text-foreground"
+                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                 }`}
               >
                 API
               </button>
               <button
-                onClick={() => setActiveTab('chat')}
+                onClick={() => setActiveTab("chat")}
                 className={`rounded-md px-3 py-1 text-sm transition-colors ${
-                  activeTab === 'chat'
-                    ? 'bg-accent text-foreground'
-                    : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                  activeTab === "chat"
+                    ? "bg-accent text-foreground"
+                    : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
                 }`}
               >
                 Chat
@@ -430,9 +466,9 @@ export function DeployModal({
             </div>
           </div>
 
-          <div className='flex-1 overflow-y-auto'>
-            <div className='p-6'>
-              {activeTab === 'api' && (
+          <div className="flex-1 overflow-y-auto">
+            <div className="p-6">
+              {activeTab === "api" && (
                 <>
                   {isDeployed ? (
                     <DeploymentInfo
@@ -450,17 +486,17 @@ export function DeployModal({
                   ) : (
                     <>
                       {apiDeployError && (
-                        <div className='mb-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-destructive text-sm'>
-                          <div className='font-semibold'>API Deployment Error</div>
+                        <div className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-destructive text-sm">
+                          <div className="font-semibold">API部署错误</div>
                           <div>{apiDeployError}</div>
                         </div>
                       )}
-                      <div className='-mx-1 px-1'>
+                      <div className="-mx-1 px-1">
                         <DeployForm
                           apiKeys={apiKeys}
                           keysLoaded={keysLoaded}
-                          endpointUrl={`${getEnv('NEXT_PUBLIC_APP_URL')}/api/workflows/${workflowId}/execute`}
-                          workflowId={workflowId || ''}
+                          endpointUrl={`${getEnv("NEXT_PUBLIC_APP_URL")}/api/workflows/${workflowId}/execute`}
+                          workflowId={workflowId || ""}
                           onSubmit={onDeploy}
                           getInputFormatExample={getInputFormatExample}
                           onApiKeyCreated={fetchApiKeys}
@@ -471,9 +507,9 @@ export function DeployModal({
                 </>
               )}
 
-              {activeTab === 'chat' && (
+              {activeTab === "chat" && (
                 <ChatDeploy
-                  workflowId={workflowId || ''}
+                  workflowId={workflowId || ""}
                   deploymentInfo={deploymentInfo}
                   onChatExistsChange={setChatExists}
                   chatSubmitting={chatSubmitting}
@@ -487,90 +523,94 @@ export function DeployModal({
           </div>
         </div>
 
-        {activeTab === 'api' && !isDeployed && (
-          <div className='flex flex-shrink-0 justify-between border-t px-6 py-4'>
-            <Button variant='outline' onClick={handleCloseModal}>
-              Cancel
+        {activeTab === "api" && !isDeployed && (
+          <div className="flex flex-shrink-0 justify-between border-t px-6 py-4">
+            <Button variant="outline" onClick={handleCloseModal}>
+              取消
             </Button>
 
             <Button
-              type='button'
-              onClick={() => onDeploy({ apiKey: apiKeys.length > 0 ? apiKeys[0].key : '' })}
+              type="button"
+              onClick={() =>
+                onDeploy({ apiKey: apiKeys.length > 0 ? apiKeys[0].key : "" })
+              }
               disabled={isSubmitting || (!keysLoaded && !apiKeys.length)}
               className={cn(
-                'gap-2 font-medium',
-                'bg-[#802FFF] hover:bg-[#7028E6]',
-                'shadow-[0_0_0_0_#802FFF] hover:shadow-[0_0_0_4px_rgba(127,47,255,0.15)]',
-                'text-white transition-all duration-200',
-                'disabled:opacity-50 disabled:hover:bg-[#802FFF] disabled:hover:shadow-none'
+                "gap-2 font-medium",
+                "bg-[#802FFF] hover:bg-[#7028E6]",
+                "shadow-[0_0_0_0_#802FFF] hover:shadow-[0_0_0_4px_rgba(127,47,255,0.15)]",
+                "text-white transition-all duration-200",
+                "disabled:opacity-50 disabled:hover:bg-[#802FFF] disabled:hover:shadow-none"
               )}
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className='mr-1.5 h-3.5 w-3.5 animate-spin' />
-                  Deploying...
+                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                  部署中...
                 </>
               ) : (
-                'Deploy API'
+                "部署API"
               )}
             </Button>
           </div>
         )}
 
-        {activeTab === 'chat' && (
-          <div className='flex flex-shrink-0 justify-between border-t px-6 py-4'>
-            <Button variant='outline' onClick={handleCloseModal}>
+        {activeTab === "chat" && (
+          <div className="flex flex-shrink-0 justify-between border-t px-6 py-4">
+            <Button variant="outline" onClick={handleCloseModal}>
               Cancel
             </Button>
 
-            <div className='flex gap-2'>
+            <div className="flex gap-2">
               {chatExists && (
                 <Button
-                  type='button'
+                  type="button"
                   onClick={() => {
-                    const form = document.getElementById('chat-deploy-form') as HTMLFormElement
+                    const form = document.getElementById(
+                      "chat-deploy-form"
+                    ) as HTMLFormElement;
                     if (form) {
                       const deleteButton = form.querySelector(
-                        '[data-delete-trigger]'
-                      ) as HTMLButtonElement
+                        "[data-delete-trigger]"
+                      ) as HTMLButtonElement;
                       if (deleteButton) {
-                        deleteButton.click()
+                        deleteButton.click();
                       }
                     }
                   }}
                   disabled={chatSubmitting}
                   className={cn(
-                    'gap-2 font-medium',
-                    'bg-red-500 hover:bg-red-600',
-                    'shadow-[0_0_0_0_rgb(239,68,68)] hover:shadow-[0_0_0_4px_rgba(239,68,68,0.15)]',
-                    'text-white transition-all duration-200',
-                    'disabled:opacity-50 disabled:hover:bg-red-500 disabled:hover:shadow-none'
+                    "gap-2 font-medium",
+                    "bg-red-500 hover:bg-red-600",
+                    "shadow-[0_0_0_0_rgb(239,68,68)] hover:shadow-[0_0_0_4px_rgba(239,68,68,0.15)]",
+                    "text-white transition-all duration-200",
+                    "disabled:opacity-50 disabled:hover:bg-red-500 disabled:hover:shadow-none"
                   )}
                 >
-                  Delete
+                  删除
                 </Button>
               )}
               <Button
-                type='button'
+                type="button"
                 onClick={handleChatFormSubmit}
                 disabled={chatSubmitting || !isChatFormValid}
                 className={cn(
-                  'gap-2 font-medium',
-                  'bg-[#802FFF] hover:bg-[#7028E6]',
-                  'shadow-[0_0_0_0_#802FFF] hover:shadow-[0_0_0_4px_rgba(127,47,255,0.15)]',
-                  'text-white transition-all duration-200',
-                  'disabled:opacity-50 disabled:hover:bg-[#802FFF] disabled:hover:shadow-none'
+                  "gap-2 font-medium",
+                  "bg-[#802FFF] hover:bg-[#7028E6]",
+                  "shadow-[0_0_0_0_#802FFF] hover:shadow-[0_0_0_4px_rgba(127,47,255,0.15)]",
+                  "text-white transition-all duration-200",
+                  "disabled:opacity-50 disabled:hover:bg-[#802FFF] disabled:hover:shadow-none"
                 )}
               >
                 {chatSubmitting ? (
                   <>
-                    <Loader2 className='mr-1.5 h-3.5 w-3.5 animate-spin' />
-                    Deploying...
+                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    部署中...
                   </>
                 ) : chatExists ? (
-                  'Update'
+                  "更新"
                 ) : (
-                  'Deploy Chat'
+                  "部署聊天"
                 )}
               </Button>
             </div>
@@ -578,5 +618,5 @@ export function DeployModal({
         )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }

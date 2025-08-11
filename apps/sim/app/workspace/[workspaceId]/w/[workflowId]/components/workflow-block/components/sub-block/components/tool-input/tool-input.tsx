@@ -1303,14 +1303,14 @@ export function ToolInput({
             <div className="flex h-10 w-full cursor-pointer items-center justify-center rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground">
               <div className="flex items-center text-base text-muted-foreground/50 md:text-sm">
                 <PlusIcon className="mr-2 h-4 w-4" />
-                Add Tool
+                添加工具
               </div>
             </div>
           </PopoverTrigger>
           <PopoverContent className="w-[200px] p-0" align="start">
             <ToolCommand.Root filter={customFilter}>
               <ToolCommand.Input
-                placeholder="Search tools..."
+                placeholder="搜索工具..."
                 onValueChange={setSearchQuery}
               />
               <ToolCommand.List>
@@ -1330,7 +1330,7 @@ export function ToolInput({
                     <div className="flex h-6 w-6 items-center justify-center rounded border border-muted-foreground/50 border-dashed bg-transparent">
                       <WrenchIcon className="h-4 w-4 text-muted-foreground" />
                     </div>
-                    <span>Create Tool</span>
+                    <span>新建工具</span>
                   </ToolCommand.Item>
 
                   {/* Display saved custom tools at the top */}
@@ -1338,7 +1338,7 @@ export function ToolInput({
                     <>
                       <ToolCommand.Separator />
                       <div className="px-2 pt-2.5 pb-0.5 font-medium text-muted-foreground text-xs">
-                        Custom Tools
+                        自定义工具
                       </div>
                       <ToolCommand.Group className="-mx-1 -px-1">
                         {customTools.map((customTool) => (
@@ -1398,7 +1398,7 @@ export function ToolInput({
                   ) && (
                     <>
                       <div className="px-2 pt-2.5 pb-0.5 font-medium text-muted-foreground text-xs">
-                        Built-in Tools
+                        内置工具
                       </div>
                       <ToolCommand.Group className="-mx-1 -px-1">
                         {toolBlocks
@@ -1926,7 +1926,7 @@ export function ToolInput({
                 className="h-6 px-2 text-muted-foreground text-xs hover:text-foreground"
               >
                 <PlusIcon className="h-3 w-3" />
-                Add Tool
+                添加工具
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[200px] p-0" align="start">

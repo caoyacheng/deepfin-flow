@@ -1,164 +1,175 @@
-import { PackageSearchIcon } from '@/components/icons'
-import type { BlockConfig } from '@/blocks/types'
+import type { BlockConfig } from "@/blocks/types";
+import { PackageSearchIcon } from "@/components/icons";
 
 export const KnowledgeBlock: BlockConfig = {
-  type: 'knowledge',
-  name: 'Knowledge',
-  description: 'Use vector search',
+  type: "knowledge",
+  name: "知识库",
+  description: "Use vector search",
   longDescription:
-    'Perform semantic vector search across knowledge bases, upload individual chunks to existing documents, or create new documents from text content. Uses advanced AI embeddings to understand meaning and context for search operations.',
-  bgColor: '#00B0B0',
+    "Perform semantic vector search across knowledge bases, upload individual chunks to existing documents, or create new documents from text content. Uses advanced AI embeddings to understand meaning and context for search operations.",
+  bgColor: "#00B0B0",
   icon: PackageSearchIcon,
-  category: 'blocks',
-  docsLink: 'https://docs.sim.ai/blocks/knowledge',
+  category: "blocks",
+  docsLink: "https://docs.sim.ai/blocks/knowledge",
   subBlocks: [
     {
-      id: 'operation',
-      title: 'Operation',
-      type: 'dropdown',
-      layout: 'full',
+      id: "operation",
+      title: "Operation",
+      type: "dropdown",
+      layout: "full",
       options: [
-        { label: 'Search', id: 'search' },
-        { label: 'Upload Chunk', id: 'upload_chunk' },
-        { label: 'Create Document', id: 'create_document' },
+        { label: "Search", id: "search" },
+        { label: "Upload Chunk", id: "upload_chunk" },
+        { label: "Create Document", id: "create_document" },
       ],
-      value: () => 'search',
+      value: () => "search",
     },
     {
-      id: 'knowledgeBaseId',
-      title: 'Knowledge Base',
-      type: 'knowledge-base-selector',
-      layout: 'full',
-      placeholder: 'Select knowledge base',
+      id: "knowledgeBaseId",
+      title: "Knowledge Base",
+      type: "knowledge-base-selector",
+      layout: "full",
+      placeholder: "Select knowledge base",
       multiSelect: false,
       required: true,
-      condition: { field: 'operation', value: ['search', 'upload_chunk', 'create_document'] },
+      condition: {
+        field: "operation",
+        value: ["search", "upload_chunk", "create_document"],
+      },
     },
     {
-      id: 'query',
-      title: 'Search Query',
-      type: 'short-input',
-      layout: 'full',
-      placeholder: 'Enter your search query (optional when using tag filters)',
+      id: "query",
+      title: "Search Query",
+      type: "short-input",
+      layout: "full",
+      placeholder: "Enter your search query (optional when using tag filters)",
       required: false,
-      condition: { field: 'operation', value: 'search' },
+      condition: { field: "operation", value: "search" },
     },
     {
-      id: 'topK',
-      title: 'Number of Results',
-      type: 'short-input',
-      layout: 'full',
-      placeholder: 'Enter number of results (default: 10)',
-      condition: { field: 'operation', value: 'search' },
+      id: "topK",
+      title: "Number of Results",
+      type: "short-input",
+      layout: "full",
+      placeholder: "Enter number of results (default: 10)",
+      condition: { field: "operation", value: "search" },
     },
     {
-      id: 'tagFilters',
-      title: 'Tag Filters',
-      type: 'knowledge-tag-filters',
-      layout: 'full',
-      placeholder: 'Add tag filters',
-      condition: { field: 'operation', value: 'search' },
-      mode: 'advanced',
+      id: "tagFilters",
+      title: "Tag Filters",
+      type: "knowledge-tag-filters",
+      layout: "full",
+      placeholder: "Add tag filters",
+      condition: { field: "operation", value: "search" },
+      mode: "advanced",
     },
     {
-      id: 'documentId',
-      title: 'Document',
-      type: 'document-selector',
-      layout: 'full',
-      placeholder: 'Select document',
+      id: "documentId",
+      title: "Document",
+      type: "document-selector",
+      layout: "full",
+      placeholder: "Select document",
       required: true,
-      condition: { field: 'operation', value: 'upload_chunk' },
+      condition: { field: "operation", value: "upload_chunk" },
     },
     {
-      id: 'content',
-      title: 'Chunk Content',
-      type: 'long-input',
-      layout: 'full',
-      placeholder: 'Enter the chunk content to upload',
+      id: "content",
+      title: "Chunk Content",
+      type: "long-input",
+      layout: "full",
+      placeholder: "Enter the chunk content to upload",
       rows: 6,
       required: true,
-      condition: { field: 'operation', value: 'upload_chunk' },
+      condition: { field: "operation", value: "upload_chunk" },
     },
     {
-      id: 'name',
-      title: 'Document Name',
-      type: 'short-input',
-      layout: 'full',
-      placeholder: 'Enter document name',
+      id: "name",
+      title: "Document Name",
+      type: "short-input",
+      layout: "full",
+      placeholder: "Enter document name",
       required: true,
-      condition: { field: 'operation', value: ['create_document'] },
+      condition: { field: "operation", value: ["create_document"] },
     },
     {
-      id: 'content',
-      title: 'Document Content',
-      type: 'long-input',
-      layout: 'full',
-      placeholder: 'Enter the document content',
+      id: "content",
+      title: "Document Content",
+      type: "long-input",
+      layout: "full",
+      placeholder: "Enter the document content",
       rows: 6,
       required: true,
-      condition: { field: 'operation', value: ['create_document'] },
+      condition: { field: "operation", value: ["create_document"] },
     },
     // Dynamic tag entry for Create Document
     {
-      id: 'documentTags',
-      title: 'Document Tags',
-      type: 'document-tag-entry',
-      layout: 'full',
-      condition: { field: 'operation', value: 'create_document' },
+      id: "documentTags",
+      title: "Document Tags",
+      type: "document-tag-entry",
+      layout: "full",
+      condition: { field: "operation", value: "create_document" },
     },
   ],
   tools: {
-    access: ['knowledge_search', 'knowledge_upload_chunk', 'knowledge_create_document'],
+    access: [
+      "knowledge_search",
+      "knowledge_upload_chunk",
+      "knowledge_create_document",
+    ],
     config: {
       tool: (params) => {
         switch (params.operation) {
-          case 'search':
-            return 'knowledge_search'
-          case 'upload_chunk':
-            return 'knowledge_upload_chunk'
-          case 'create_document':
-            return 'knowledge_create_document'
+          case "search":
+            return "knowledge_search";
+          case "upload_chunk":
+            return "knowledge_upload_chunk";
+          case "create_document":
+            return "knowledge_create_document";
           default:
-            return 'knowledge_search'
+            return "knowledge_search";
         }
       },
       params: (params) => {
         // Validate required fields for each operation
-        if (params.operation === 'search' && !params.knowledgeBaseId) {
-          throw new Error('Knowledge base ID is required for search operation')
+        if (params.operation === "search" && !params.knowledgeBaseId) {
+          throw new Error("Knowledge base ID is required for search operation");
         }
         if (
-          (params.operation === 'upload_chunk' || params.operation === 'create_document') &&
+          (params.operation === "upload_chunk" ||
+            params.operation === "create_document") &&
           !params.knowledgeBaseId
         ) {
           throw new Error(
-            'Knowledge base ID is required for upload_chunk and create_document operations'
-          )
+            "Knowledge base ID is required for upload_chunk and create_document operations"
+          );
         }
-        if (params.operation === 'upload_chunk' && !params.documentId) {
-          throw new Error('Document ID is required for upload_chunk operation')
+        if (params.operation === "upload_chunk" && !params.documentId) {
+          throw new Error("Document ID is required for upload_chunk operation");
         }
 
-        return params
+        return params;
       },
     },
   },
   inputs: {
-    operation: { type: 'string', description: 'Operation to perform' },
-    knowledgeBaseId: { type: 'string', description: 'Knowledge base identifier' },
-    query: { type: 'string', description: 'Search query terms' },
-    topK: { type: 'number', description: 'Number of results' },
-    documentId: { type: 'string', description: 'Document identifier' },
-    content: { type: 'string', description: 'Content data' },
-    name: { type: 'string', description: 'Document name' },
+    operation: { type: "string", description: "Operation to perform" },
+    knowledgeBaseId: {
+      type: "string",
+      description: "Knowledge base identifier",
+    },
+    query: { type: "string", description: "Search query terms" },
+    topK: { type: "number", description: "Number of results" },
+    documentId: { type: "string", description: "Document identifier" },
+    content: { type: "string", description: "Content data" },
+    name: { type: "string", description: "Document name" },
     // Dynamic tag filters for search
-    tagFilters: { type: 'string', description: 'Tag filter criteria' },
+    tagFilters: { type: "string", description: "Tag filter criteria" },
     // Document tags for create document (JSON string of tag objects)
-    documentTags: { type: 'string', description: 'Document tags' },
+    documentTags: { type: "string", description: "Document tags" },
   },
   outputs: {
-    results: { type: 'json', description: 'Search results' },
-    query: { type: 'string', description: 'Query used' },
-    totalResults: { type: 'number', description: 'Total results count' },
+    results: { type: "json", description: "Search results" },
+    query: { type: "string", description: "Query used" },
+    totalResults: { type: "number", description: "Total results count" },
   },
-}
+};

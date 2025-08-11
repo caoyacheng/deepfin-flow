@@ -60,7 +60,7 @@ const getToolIdFromBlock = (blockType: string): string | undefined => {
 
 export const AgentBlock: BlockConfig<AgentResponse> = {
   type: "agent",
-  name: "Agent",
+  name: "智能体",
   description: "Build an agent",
   longDescription:
     "Create powerful AI agents using any LLM provider with customizable system prompts and tool integrations.",

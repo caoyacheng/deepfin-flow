@@ -1,22 +1,22 @@
-import { CodeIcon } from '@/components/icons'
-import type { BlockConfig } from '@/blocks/types'
-import type { CodeExecutionOutput } from '@/tools/function/types'
+import type { BlockConfig } from "@/blocks/types";
+import { CodeIcon } from "@/components/icons";
+import type { CodeExecutionOutput } from "@/tools/function/types";
 
 export const FunctionBlock: BlockConfig<CodeExecutionOutput> = {
-  type: 'function',
-  name: 'Function',
-  description: 'Run custom logic',
+  type: "function",
+  name: "函数",
+  description: "Run custom logic",
   longDescription:
-    'Execute custom JavaScript or TypeScript code within your workflow to transform data or implement complex logic. Create reusable functions to process inputs and generate outputs for other blocks.',
-  docsLink: 'https://docs.sim.ai/blocks/function',
-  category: 'blocks',
-  bgColor: '#FF402F',
+    "Execute custom JavaScript or TypeScript code within your workflow to transform data or implement complex logic. Create reusable functions to process inputs and generate outputs for other blocks.",
+  docsLink: "https://docs.sim.ai/blocks/function",
+  category: "blocks",
+  bgColor: "#FF402F",
   icon: CodeIcon,
   subBlocks: [
     {
-      id: 'code',
-      type: 'code',
-      layout: 'full',
+      id: "code",
+      type: "code",
+      layout: "full",
       wandConfig: {
         enabled: true,
         maintainHistory: true,
@@ -67,23 +67,30 @@ try {
   // Re-throwing the error ensures the workflow knows this step failed.
   throw error;
 }`,
-        placeholder: 'Describe the function you want to create...',
-        generationType: 'javascript-function-body',
+        placeholder: "Describe the function you want to create...",
+        generationType: "javascript-function-body",
       },
     },
   ],
   tools: {
-    access: ['function_execute'],
+    access: ["function_execute"],
   },
   inputs: {
-    code: { type: 'string', description: 'JavaScript/TypeScript code to execute' },
-    timeout: { type: 'number', description: 'Execution timeout' },
+    code: {
+      type: "string",
+      description: "JavaScript/TypeScript code to execute",
+    },
+    timeout: { type: "number", description: "Execution timeout" },
   },
   outputs: {
-    result: { type: 'json', description: 'Return value from the executed JavaScript function' },
+    result: {
+      type: "json",
+      description: "Return value from the executed JavaScript function",
+    },
     stdout: {
-      type: 'string',
-      description: 'Console log output and debug messages from function execution',
+      type: "string",
+      description:
+        "Console log output and debug messages from function execution",
     },
   },
-}
+};

@@ -612,13 +612,13 @@ export function getApiKey(
       }
 
       // Otherwise, throw an error
-      throw new Error(`No API key available for ${provider} ${model}`);
+      throw new Error(`请输入${provider} ${model}的API密钥`);
     }
   }
 
   // For all other cases, require user-provided key
   if (!hasUserKey) {
-    throw new Error(`API key is required for ${provider} ${model}`);
+    throw new Error(`请输入${provider} ${model}的API密钥`);
   }
 
   return userProvidedKey!;
