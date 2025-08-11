@@ -1,14 +1,14 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { AnimatePresence, motion } from 'framer-motion'
-import { usePathname } from 'next/navigation'
-import { getFormattedGitHubStars } from '@/app/(landing)/actions/github'
-import GitHubStarsClient from '@/app/(landing)/components/github-stars-client'
-import NavClient from '@/app/(landing)/components/nav-client'
+import { getFormattedGitHubStars } from "@/app/(landing)/actions/github";
+import GitHubStarsClient from "@/app/(landing)/components/github-stars-client";
+import NavClient from "@/app/(landing)/components/nav-client";
+import { AnimatePresence, motion } from "framer-motion";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface NavWrapperProps {
-  onOpenTypeformLink: () => void
+  onOpenTypeformLink: () => void;
 }
 
 export default function NavWrapper({ onOpenTypeformLink }: NavWrapperProps) {
@@ -16,52 +16,52 @@ export default function NavWrapper({ onOpenTypeformLink }: NavWrapperProps) {
   // This avoids trying to use server-side UA detection
   // which has compatibility challenges
 
-  const pathname = usePathname()
-  const [initialIsMobile, setInitialIsMobile] = useState(false)
-  const [isLoaded, setIsLoaded] = useState(false)
+  const pathname = usePathname();
+  const [initialIsMobile, setInitialIsMobile] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   // Default to a reasonable number and update it later
-  const [starCount, setStarCount] = useState('1.2k')
+  const [starCount, setStarCount] = useState("1.2k");
 
   useEffect(() => {
     // Set initial mobile state based on window width
-    setInitialIsMobile(window.innerWidth < 768)
+    setInitialIsMobile(window.innerWidth < 768);
 
     // Slight delay to ensure smooth animations with other elements
     setTimeout(() => {
-      setIsLoaded(true)
-    }, 100)
+      setIsLoaded(true);
+    }, 100);
 
     // Use server action to fetch stars
     getFormattedGitHubStars()
       .then((formattedStars) => {
-        setStarCount(formattedStars)
+        setStarCount(formattedStars);
       })
       .catch((err) => {
-        console.error('Failed to fetch GitHub stars:', err)
-      })
-  }, [])
+        console.error("Failed to fetch GitHub stars:", err);
+      });
+  }, []);
 
   return (
     <>
-      <AnimatePresence mode='wait'>
+      <AnimatePresence mode="wait">
         {!isLoaded ? (
           <motion.div
-            key='loading'
+            key="loading"
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.5 }}
             exit={{ opacity: 0 }}
-            className='absolute top-1 right-0 left-0 z-30 px-4 py-8'
+            className="absolute top-1 right-0 left-0 z-30 px-4 py-8"
           >
-            <div className='relative mx-auto flex max-w-7xl items-center justify-between'>
-              <div className='flex-1' />
-              <div className='flex flex-1 justify-end'>
-                <div className='h-[43px] w-[43px]' />
+            <div className="relative mx-auto flex max-w-7xl items-center justify-between">
+              <div className="flex-1" />
+              <div className="flex flex-1 justify-end">
+                <div className="h-[43px] w-[43px]" />
               </div>
             </div>
           </motion.div>
         ) : (
           <motion.div
-            key='loaded'
+            key="loaded"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
@@ -77,5 +77,5 @@ export default function NavWrapper({ onOpenTypeformLink }: NavWrapperProps) {
         )}
       </AnimatePresence>
     </>
-  )
+  );
 }

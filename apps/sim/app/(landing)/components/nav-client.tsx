@@ -235,22 +235,25 @@ export default function NavClient({
             {!isMobile && (
               <>
                 <div className='flex items-center'>{children}</div>
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.4 }}
-                >
-                  <Link
-                    href='https://form.typeform.com/to/jqCO12pF'
-                    target='_blank'
-                    rel='noopener noreferrer'
-                  >
-                    <Button className='h-[43px] bg-[#701ffc] px-6 py-2 font-geist-sans font-medium text-base text-neutral-100 transition-colors duration-200 hover:bg-[#802FFF]'>
-                      Contact
-                    </Button>
-                  </Link>
-                </motion.div>
               </>
+            )}
+
+            {isMobile && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.4 }}
+              >
+                <Link
+                  href='https://form.typeform.com/to/jqCO12pF'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  <Button className='h-[43px] bg-[#701ffc] px-6 py-2 font-geist-sans font-medium text-base text-neutral-100 transition-colors duration-200 hover:bg-[#802FFF]'>
+                    Contact
+                  </Button>
+                </Link>
+              </motion.div>
             )}
 
             {isMobile && (
