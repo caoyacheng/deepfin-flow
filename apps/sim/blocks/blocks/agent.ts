@@ -1,7 +1,7 @@
-import { AgentIcon } from '@/components/icons'
-import { isHosted } from '@/lib/environment'
-import { createLogger } from '@/lib/logs/console/logger'
-import type { BlockConfig } from '@/blocks/types'
+import type { BlockConfig } from "@/blocks/types";
+import { AgentIcon } from "@/components/icons";
+import { isHosted } from "@/lib/environment";
+import { createLogger } from "@/lib/logs/console/logger";
 import {
   getAllModelProviders,
   getBaseModelProviders,
@@ -11,69 +11,70 @@ import {
   MODELS_TEMP_RANGE_0_2,
   MODELS_WITH_TEMPERATURE_SUPPORT,
   providers,
-} from '@/providers/utils'
+} from "@/providers/utils";
 
 // Get current Ollama models dynamically
 const getCurrentOllamaModels = () => {
-  return useOllamaStore.getState().models
-}
+  return useOllamaStore.getState().models;
+};
 
-import { useOllamaStore } from '@/stores/ollama/store'
-import type { ToolResponse } from '@/tools/types'
+import { useOllamaStore } from "@/stores/ollama/store";
+import type { ToolResponse } from "@/tools/types";
 
-const logger = createLogger('AgentBlock')
+const logger = createLogger("AgentBlock");
 
 interface AgentResponse extends ToolResponse {
   output: {
-    content: string
-    model: string
+    content: string;
+    model: string;
     tokens?: {
-      prompt?: number
-      completion?: number
-      total?: number
-    }
+      prompt?: number;
+      completion?: number;
+      total?: number;
+    };
     toolCalls?: {
       list: Array<{
-        name: string
-        arguments: Record<string, any>
-      }>
-      count: number
-    }
-  }
+        name: string;
+        arguments: Record<string, any>;
+      }>;
+      count: number;
+    };
+  };
 }
 
 // Helper function to get the tool ID from a block type
 const getToolIdFromBlock = (blockType: string): string | undefined => {
   try {
-    const { getAllBlocks } = require('@/blocks/registry')
-    const blocks = getAllBlocks()
+    const { getAllBlocks } = require("@/blocks/registry");
+    const blocks = getAllBlocks();
     const block = blocks.find(
-      (b: { type: string; tools?: { access?: string[] } }) => b.type === blockType
-    )
-    return block?.tools?.access?.[0]
+      (b: { type: string; tools?: { access?: string[] } }) =>
+        b.type === blockType
+    );
+    return block?.tools?.access?.[0];
   } catch (error) {
-    logger.error('Error getting tool ID from block', { error })
-    return undefined
+    logger.error("Error getting tool ID from block", { error });
+    return undefined;
   }
-}
+};
 
 export const AgentBlock: BlockConfig<AgentResponse> = {
-  type: 'agent',
-  name: 'Agent',
-  description: 'Build an agent',
+  type: "agent",
+  name: "Agent",
+  description: "Build an agent",
   longDescription:
-    'Create powerful AI agents using any LLM provider with customizable system prompts and tool integrations.',
-  docsLink: 'https://docs.sim.ai/blocks/agent',
-  category: 'blocks',
-  bgColor: '#802FFF',
+    "Create powerful AI agents using any LLM provider with customizable system prompts and tool integrations.",
+  docsLink: "https://docs.sim.ai/blocks/agent",
+  category: "blocks",
+  bgColor: "#802FFF",
   icon: AgentIcon,
   subBlocks: [
     {
-      id: 'systemPrompt',
-      title: '系统提示词',
-      type: 'long-input',
-      layout: 'full',
-      placeholder: '输入系统提示词',
+      id: "systemPrompt",
+      title: "系统提示词",
+      type: "long-input",
+      layout: "full",
+      placeholder: "输入系统提示词",
       rows: 5,
       wandConfig: {
         enabled: true,
@@ -128,81 +129,81 @@ Present findings in executive-ready formats with source citations, highlight key
 
 ### FINAL INSTRUCTION
 Create a system prompt appropriately detailed for the request, using clear language and relevant tool instructions.`,
-        placeholder: 'Describe the AI agent you want to create...',
-        generationType: 'system-prompt',
+        placeholder: "Describe the AI agent you want to create...",
+        generationType: "system-prompt",
       },
     },
     {
-      id: 'userPrompt',
-      title: '用户提示词',
-      type: 'long-input',
-      layout: 'full',
-      placeholder: '请输入上下文或用户消息',
+      id: "userPrompt",
+      title: "用户提示词",
+      type: "long-input",
+      layout: "full",
+      placeholder: "请输入上下文或用户消息",
       rows: 3,
     },
     {
-      id: 'memories',
-      title: 'Memories',
-      type: 'short-input',
-      layout: 'full',
-      placeholder: 'Connect memory block output...',
-      mode: 'advanced',
+      id: "memories",
+      title: "Memories",
+      type: "short-input",
+      layout: "full",
+      placeholder: "Connect memory block output...",
+      mode: "advanced",
     },
     {
-      id: 'model',
-      title: '模型',
-      type: 'combobox',
-      layout: 'half',
-      placeholder: '输入或选择一个模型',
+      id: "model",
+      title: "模型",
+      type: "combobox",
+      layout: "half",
+      placeholder: "输入或选择一个模型",
       required: true,
       options: () => {
-        const ollamaModels = useOllamaStore.getState().models
-        const baseModels = Object.keys(getBaseModelProviders())
-        const allModels = [...baseModels, ...ollamaModels]
+        const ollamaModels = useOllamaStore.getState().models;
+        const baseModels = Object.keys(getBaseModelProviders());
+        const allModels = [...baseModels, ...ollamaModels];
 
         return allModels.map((model) => {
-          const icon = getProviderIcon(model)
-          return { label: model, id: model, ...(icon && { icon }) }
-        })
+          const icon = getProviderIcon(model);
+          return { label: model, id: model, ...(icon && { icon }) };
+        });
       },
     },
     {
-      id: 'temperature',
-      title: 'Temperature',
-      type: 'slider',
-      layout: 'half',
+      id: "temperature",
+      title: "Temperature",
+      type: "slider",
+      layout: "half",
       min: 0,
       max: 1,
       condition: {
-        field: 'model',
+        field: "model",
         value: MODELS_TEMP_RANGE_0_1,
       },
     },
     {
-      id: 'temperature',
-      title: 'Temperature',
-      type: 'slider',
-      layout: 'half',
+      id: "temperature",
+      title: "Temperature",
+      type: "slider",
+      layout: "half",
       min: 0,
       max: 2,
       condition: {
-        field: 'model',
+        field: "model",
         value: MODELS_TEMP_RANGE_0_2,
       },
     },
     {
-      id: 'temperature',
-      title: 'Temperature',
-      type: 'slider',
-      layout: 'full',
+      id: "temperature",
+      title: "Temperature",
+      type: "slider",
+      layout: "full",
       min: 0,
       max: 2,
       condition: {
-        field: 'model',
+        field: "model",
         value: [...MODELS_TEMP_RANGE_0_1, ...MODELS_TEMP_RANGE_0_2],
         not: true,
         and: {
-          field: 'model',
+          field: "model",
           value: Object.keys(getBaseModelProviders()).filter(
             (model) => !MODELS_WITH_TEMPERATURE_SUPPORT.includes(model)
           ),
@@ -211,65 +212,65 @@ Create a system prompt appropriately detailed for the request, using clear langu
       },
     },
     {
-      id: 'apiKey',
-      title: 'API Key',
-      type: 'short-input',
-      layout: 'full',
-      placeholder: '输入 API key',
+      id: "apiKey",
+      title: "API Key",
+      type: "short-input",
+      layout: "full",
+      placeholder: "输入 API key",
       password: true,
       connectionDroppable: false,
       required: true,
       // Hide API key for hosted models and Ollama models
       condition: isHosted
         ? {
-            field: 'model',
+            field: "model",
             value: getHostedModels(),
             not: true, // Show for all models EXCEPT those listed
           }
         : () => ({
-            field: 'model',
+            field: "model",
             value: getCurrentOllamaModels(),
             not: true, // Show for all models EXCEPT Ollama models
           }),
     },
     {
-      id: 'azureEndpoint',
-      title: 'Azure OpenAI Endpoint',
-      type: 'short-input',
-      layout: 'full',
+      id: "azureEndpoint",
+      title: "Azure OpenAI Endpoint",
+      type: "short-input",
+      layout: "full",
       password: true,
-      placeholder: 'https://your-resource.openai.azure.com',
+      placeholder: "https://your-resource.openai.azure.com",
       connectionDroppable: false,
       condition: {
-        field: 'model',
-        value: providers['azure-openai'].models,
+        field: "model",
+        value: providers["azure-openai"].models,
       },
     },
     {
-      id: 'azureApiVersion',
-      title: 'Azure API Version',
-      type: 'short-input',
-      layout: 'full',
-      placeholder: '2024-07-01-preview',
+      id: "azureApiVersion",
+      title: "Azure API Version",
+      type: "short-input",
+      layout: "full",
+      placeholder: "2024-07-01-preview",
       connectionDroppable: false,
       condition: {
-        field: 'model',
-        value: providers['azure-openai'].models,
+        field: "model",
+        value: providers["azure-openai"].models,
       },
     },
     {
-      id: 'tools',
-      title: '工具',
-      type: 'tool-input',
-      layout: 'full',
+      id: "tools",
+      title: "工具",
+      type: "tool-input",
+      layout: "full",
     },
     {
-      id: 'responseFormat',
-      title: 'Response Format',
-      type: 'code',
-      layout: 'full',
-      placeholder: '输入JSON各式',
-      language: 'json',
+      id: "responseFormat",
+      title: "响应格式",
+      type: "code",
+      layout: "full",
+      placeholder: "输入JSON各式",
+      language: "json",
       wandConfig: {
         enabled: true,
         maintainHistory: true,
@@ -358,31 +359,31 @@ Example 3 (Array Input):
     }
 }
 `,
-        placeholder: 'Describe the JSON schema structure you need...',
-        generationType: 'json-schema',
+        placeholder: "Describe the JSON schema structure you need...",
+        generationType: "json-schema",
       },
     },
   ],
   tools: {
     access: [
-      'openai_chat',
-      'anthropic_chat',
-      'google_chat',
-      'xai_chat',
-      'deepseek_chat',
-      'deepseek_reasoner',
+      "openai_chat",
+      "anthropic_chat",
+      "google_chat",
+      "xai_chat",
+      "deepseek_chat",
+      "deepseek_reasoner",
     ],
     config: {
       tool: (params: Record<string, any>) => {
-        const model = params.model || 'gpt-4o'
+        const model = params.model || "gpt-4o";
         if (!model) {
-          throw new Error('No model selected')
+          throw new Error("No model selected");
         }
-        const tool = getAllModelProviders()[model]
+        const tool = getAllModelProviders()[model];
         if (!tool) {
-          throw new Error(`Invalid model selected: ${model}`)
+          throw new Error(`Invalid model selected: ${model}`);
         }
-        return tool
+        return tool;
       },
       params: (params: Record<string, any>) => {
         // If tools array is provided, handle tool usage control
@@ -391,106 +392,121 @@ Example 3 (Array Input):
           const transformedTools = params.tools
             // Filter out tools set to 'none' - they should never be passed to the provider
             .filter((tool: any) => {
-              const usageControl = tool.usageControl || 'auto'
-              return usageControl !== 'none'
+              const usageControl = tool.usageControl || "auto";
+              return usageControl !== "none";
             })
             .map((tool: any) => {
               // Get the base tool configuration
               const toolConfig = {
                 id:
-                  tool.type === 'custom-tool'
+                  tool.type === "custom-tool"
                     ? tool.schema?.function?.name
                     : tool.operation || getToolIdFromBlock(tool.type),
                 name: tool.title,
-                description: tool.type === 'custom-tool' ? tool.schema?.function?.description : '',
+                description:
+                  tool.type === "custom-tool"
+                    ? tool.schema?.function?.description
+                    : "",
                 params: tool.params || {},
-                parameters: tool.type === 'custom-tool' ? tool.schema?.function?.parameters : {}, // We'd need to get actual parameters for non-custom tools
-                usageControl: tool.usageControl || 'auto',
-              }
-              return toolConfig
-            })
+                parameters:
+                  tool.type === "custom-tool"
+                    ? tool.schema?.function?.parameters
+                    : {}, // We'd need to get actual parameters for non-custom tools
+                usageControl: tool.usageControl || "auto",
+              };
+              return toolConfig;
+            });
 
           // Log which tools are being passed and which are filtered out
           const filteredOutTools = params.tools
-            .filter((tool: any) => (tool.usageControl || 'auto') === 'none')
-            .map((tool: any) => tool.title)
+            .filter((tool: any) => (tool.usageControl || "auto") === "none")
+            .map((tool: any) => tool.title);
 
           if (filteredOutTools.length > 0) {
-            logger.info('Filtered out tools set to none', { tools: filteredOutTools.join(', ') })
+            logger.info("Filtered out tools set to none", {
+              tools: filteredOutTools.join(", "),
+            });
           }
 
-          logger.info('Transformed tools', { tools: transformedTools })
+          logger.info("Transformed tools", { tools: transformedTools });
           if (transformedTools.length === 0) {
-            logger.info('No tools will be passed to the provider after filtering')
+            logger.info(
+              "No tools will be passed to the provider after filtering"
+            );
           } else {
-            logger.info('Tools passed to provider', { count: transformedTools.length })
+            logger.info("Tools passed to provider", {
+              count: transformedTools.length,
+            });
           }
 
-          return { ...params, tools: transformedTools }
+          return { ...params, tools: transformedTools };
         }
-        return params
+        return params;
       },
     },
   },
   inputs: {
-    systemPrompt: { type: 'string', description: 'Initial system instructions' },
-    userPrompt: { type: 'string', description: 'User message or context' },
-    memories: { type: 'json', description: 'Agent memory data' },
-    model: { type: 'string', description: 'AI model to use' },
-    apiKey: { type: 'string', description: 'Provider API key' },
-    azureEndpoint: { type: 'string', description: 'Azure OpenAI endpoint URL' },
-    azureApiVersion: { type: 'string', description: 'Azure API version' },
+    systemPrompt: {
+      type: "string",
+      description: "Initial system instructions",
+    },
+    userPrompt: { type: "string", description: "User message or context" },
+    memories: { type: "json", description: "Agent memory data" },
+    model: { type: "string", description: "AI model to use" },
+    apiKey: { type: "string", description: "Provider API key" },
+    azureEndpoint: { type: "string", description: "Azure OpenAI endpoint URL" },
+    azureApiVersion: { type: "string", description: "Azure API version" },
     responseFormat: {
-      type: 'json',
-      description: 'JSON response format schema',
+      type: "json",
+      description: "JSON response format schema",
       schema: {
-        type: 'object',
+        type: "object",
         properties: {
           name: {
-            type: 'string',
-            description: 'A name for your schema (optional)',
+            type: "string",
+            description: "A name for your schema (optional)",
           },
           schema: {
-            type: 'object',
-            description: 'The JSON Schema definition',
+            type: "object",
+            description: "The JSON Schema definition",
             properties: {
               type: {
-                type: 'string',
-                enum: ['object'],
+                type: "string",
+                enum: ["object"],
                 description: 'Must be "object" for a valid JSON Schema',
               },
               properties: {
-                type: 'object',
-                description: 'Object containing property definitions',
+                type: "object",
+                description: "Object containing property definitions",
               },
               required: {
-                type: 'array',
-                items: { type: 'string' },
-                description: 'Array of required property names',
+                type: "array",
+                items: { type: "string" },
+                description: "Array of required property names",
               },
               additionalProperties: {
-                type: 'boolean',
-                description: 'Whether additional properties are allowed',
+                type: "boolean",
+                description: "Whether additional properties are allowed",
               },
             },
-            required: ['type', 'properties'],
+            required: ["type", "properties"],
           },
           strict: {
-            type: 'boolean',
-            description: 'Whether to enforce strict schema validation',
+            type: "boolean",
+            description: "Whether to enforce strict schema validation",
             default: true,
           },
         },
-        required: ['schema'],
+        required: ["schema"],
       },
     },
-    temperature: { type: 'number', description: 'Response randomness level' },
-    tools: { type: 'json', description: 'Available tools configuration' },
+    temperature: { type: "number", description: "Response randomness level" },
+    tools: { type: "json", description: "Available tools configuration" },
   },
   outputs: {
-    content: { type: 'string', description: 'Generated response content' },
-    model: { type: 'string', description: 'Model used for generation' },
-    tokens: { type: 'any', description: 'Token usage statistics' },
-    toolCalls: { type: 'any', description: 'Tool calls made' },
+    content: { type: "string", description: "Generated response content" },
+    model: { type: "string", description: "Model used for generation" },
+    tokens: { type: "any", description: "Token usage statistics" },
+    toolCalls: { type: "any", description: "Tool calls made" },
   },
-}
+};
