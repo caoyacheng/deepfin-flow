@@ -62,10 +62,10 @@ function Hero() {
       <Button
         variant={"secondary"}
         onClick={handleNavigate}
-        className="animate-fade-in items-center bg-[#701ffc] px-7 py-6 font-[420] font-geist-sans text-lg text-neutral-100 tracking-normal shadow-[#701ffc]/30 shadow-lg hover:bg-[#802FFF]"
+        className="animate-fade-in items-center bg-[#1745eb] px-7 py-6 font-[420] font-geist-sans text-lg text-neutral-100 tracking-normal shadow-[#60a5fa]/30 shadow-lg hover:bg-[#4179f1]"
         aria-label="Start using the platform"
       >
-        <div className="text-[1.15rem]">Start now</div>
+        <div className="text-[1.15rem]">开始使用</div>
         <div
           className="flex items-center gap-1 pl-2 opacity-80"
           aria-hidden="true"
@@ -134,14 +134,13 @@ function Hero() {
 
       <div className="animation-container relative z-20 space-y-4 px-4 text-center">
         <h1 className="animation-container animate-fade-up font-semibold text-[42px] leading-[1.10] opacity-0 will-change-[opacity,transform] [animation-delay:200ms] md:text-[68px]">
-          Build / Deploy
+          龙智工作流
           <br />
-          Agent Workflows
         </h1>
 
         <p className="animation-container mx-auto max-w-3xl animate-fade-up font-normal text-base text-neutral-400/80 leading-[1.5] tracking-normal opacity-0 will-change-[opacity,transform] [animation-delay:400ms] md:text-xl">
-          Launch agentic workflows with an open source, <br />
-          user-friendly environment for devs and agents
+          Loongflow <br />
+          大模型驱动的智能工作流平台
         </p>
 
         <div className="animation-container translate-y-[-10px] animate-fade-up pt-4 pb-10 opacity-0 will-change-[opacity,transform] [animation-delay:600ms]">
