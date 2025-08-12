@@ -1,29 +1,40 @@
-import { createLogger } from '@/lib/logs/console/logger'
-import type { CustomBlobConfig } from '@/lib/uploads/blob/blob-client'
-import type { CustomS3Config } from '@/lib/uploads/s3/s3-client'
-import { USE_BLOB_STORAGE, USE_S3_STORAGE } from '@/lib/uploads/setup'
+import { createLogger } from "@/lib/logs/console/logger";
+import type { CustomBlobConfig } from "@/lib/uploads/blob/blob-client";
+import type { CustomOSSConfig } from "@/lib/uploads/oss/types";
+import type { CustomS3Config } from "@/lib/uploads/s3/s3-client";
+import {
+  USE_BLOB_STORAGE,
+  USE_OSS_STORAGE,
+  USE_S3_STORAGE,
+} from "@/lib/uploads/setup";
 
-const logger = createLogger('StorageClient')
+const logger = createLogger("StorageClient");
 
 // Client-safe type definitions
 export type FileInfo = {
-  path: string
-  key: string
-  name: string
-  size: number
-  type: string
-}
+  path: string;
+  key: string;
+  name: string;
+  size: number;
+  type: string;
+};
 
 export type CustomStorageConfig = {
+  // OSS config
+  accessKeyId?: string;
+  accessKeySecret?: string;
+  bucket?: string;
+  region?: string;
+  endpoint?: string;
   // S3 config
-  bucket?: string
-  region?: string
+  bucket?: string;
+  region?: string;
   // Blob config
-  containerName?: string
-  accountName?: string
-  accountKey?: string
-  connectionString?: string
-}
+  containerName?: string;
+  accountName?: string;
+  accountKey?: string;
+  connectionString?: string;
+};
 
 /**
  * Upload a file to the configured storage provider
@@ -38,7 +49,7 @@ export async function uploadFile(
   fileName: string,
   contentType: string,
   size?: number
-): Promise<FileInfo>
+): Promise<FileInfo>;
 
 /**
  * Upload a file to the configured storage provider with custom configuration
@@ -55,7 +66,7 @@ export async function uploadFile(
   contentType: string,
   customConfig: CustomStorageConfig,
   size?: number
-): Promise<FileInfo>
+): Promise<FileInfo>;
 
 export async function uploadFile(
   file: Buffer,
@@ -64,37 +75,79 @@ export async function uploadFile(
   configOrSize?: CustomStorageConfig | number,
   size?: number
 ): Promise<FileInfo> {
+  if (USE_OSS_STORAGE) {
+    logger.info(`Uploading file to Aliyun OSS: ${fileName}`);
+    const { uploadToOSS } = await import("@/lib/uploads/oss/oss-client");
+    if (typeof configOrSize === "object") {
+      const ossConfig: CustomOSSConfig = {
+        accessKeyId: configOrSize.accessKeyId!,
+        accessKeySecret: configOrSize.accessKeySecret!,
+        bucket: configOrSize.bucket!,
+        region: configOrSize.region!,
+        endpoint: configOrSize.endpoint,
+      };
+      const result = await uploadToOSS(
+        file,
+        fileName,
+        contentType,
+        ossConfig,
+        size
+      );
+      return {
+        path: `/api/files/serve/oss/${encodeURIComponent(result.key)}`,
+        key: result.key,
+        name: fileName,
+        size: size || file.length,
+        type: contentType,
+      };
+    }
+    const result = await uploadToOSS(
+      file,
+      fileName,
+      contentType,
+      undefined,
+      size
+    );
+    return {
+      path: `/api/files/serve/oss/${encodeURIComponent(result.key)}`,
+      key: result.key,
+      name: fileName,
+      size: size || file.length,
+      type: contentType,
+    };
+  }
+
   if (USE_BLOB_STORAGE) {
-    logger.info(`Uploading file to Azure Blob Storage: ${fileName}`)
-    const { uploadToBlob } = await import('@/lib/uploads/blob/blob-client')
-    if (typeof configOrSize === 'object') {
+    logger.info(`Uploading file to Azure Blob Storage: ${fileName}`);
+    const { uploadToBlob } = await import("@/lib/uploads/blob/blob-client");
+    if (typeof configOrSize === "object") {
       const blobConfig: CustomBlobConfig = {
         containerName: configOrSize.containerName!,
         accountName: configOrSize.accountName!,
         accountKey: configOrSize.accountKey,
         connectionString: configOrSize.connectionString,
-      }
-      return uploadToBlob(file, fileName, contentType, blobConfig, size)
+      };
+      return uploadToBlob(file, fileName, contentType, blobConfig, size);
     }
-    return uploadToBlob(file, fileName, contentType, configOrSize)
+    return uploadToBlob(file, fileName, contentType, configOrSize);
   }
 
   if (USE_S3_STORAGE) {
-    logger.info(`Uploading file to S3: ${fileName}`)
-    const { uploadToS3 } = await import('@/lib/uploads/s3/s3-client')
-    if (typeof configOrSize === 'object') {
+    logger.info(`Uploading file to S3: ${fileName}`);
+    const { uploadToS3 } = await import("@/lib/uploads/s3/s3-client");
+    if (typeof configOrSize === "object") {
       const s3Config: CustomS3Config = {
         bucket: configOrSize.bucket!,
         region: configOrSize.region!,
-      }
-      return uploadToS3(file, fileName, contentType, s3Config, size)
+      };
+      return uploadToS3(file, fileName, contentType, s3Config, size);
     }
-    return uploadToS3(file, fileName, contentType, configOrSize)
+    return uploadToS3(file, fileName, contentType, configOrSize);
   }
 
   throw new Error(
-    'No storage provider configured. Set Azure credentials (AZURE_CONNECTION_STRING or AZURE_ACCOUNT_NAME + AZURE_ACCOUNT_KEY) or configure AWS credentials for S3.'
-  )
+    "No storage provider configured. Set Aliyun OSS credentials (OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET, OSS_BUCKET_NAME, OSS_REGION), Azure credentials (AZURE_CONNECTION_STRING or AZURE_ACCOUNT_NAME + AZURE_ACCOUNT_KEY), or configure AWS credentials for S3."
+  );
 }
 
 /**
@@ -103,21 +156,27 @@ export async function uploadFile(
  * @returns File buffer
  */
 export async function downloadFile(key: string): Promise<Buffer> {
+  if (USE_OSS_STORAGE) {
+    logger.info(`Downloading file from Aliyun OSS: ${key}`);
+    const { downloadFromOSS } = await import("@/lib/uploads/oss/oss-client");
+    return downloadFromOSS(key);
+  }
+
   if (USE_BLOB_STORAGE) {
-    logger.info(`Downloading file from Azure Blob Storage: ${key}`)
-    const { downloadFromBlob } = await import('@/lib/uploads/blob/blob-client')
-    return downloadFromBlob(key)
+    logger.info(`Downloading file from Azure Blob Storage: ${key}`);
+    const { downloadFromBlob } = await import("@/lib/uploads/blob/blob-client");
+    return downloadFromBlob(key);
   }
 
   if (USE_S3_STORAGE) {
-    logger.info(`Downloading file from S3: ${key}`)
-    const { downloadFromS3 } = await import('@/lib/uploads/s3/s3-client')
-    return downloadFromS3(key)
+    logger.info(`Downloading file from S3: ${key}`);
+    const { downloadFromS3 } = await import("@/lib/uploads/s3/s3-client");
+    return downloadFromS3(key);
   }
 
   throw new Error(
-    'No storage provider configured. Set Azure credentials (AZURE_CONNECTION_STRING or AZURE_ACCOUNT_NAME + AZURE_ACCOUNT_KEY) or configure AWS credentials for S3.'
-  )
+    "No storage provider configured. Set Aliyun OSS credentials (OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET, OSS_BUCKET_NAME, OSS_REGION), Azure credentials (AZURE_CONNECTION_STRING or AZURE_ACCOUNT_NAME + AZURE_ACCOUNT_KEY), or configure AWS credentials for S3."
+  );
 }
 
 /**
@@ -125,21 +184,27 @@ export async function downloadFile(key: string): Promise<Buffer> {
  * @param key File key/name
  */
 export async function deleteFile(key: string): Promise<void> {
+  if (USE_OSS_STORAGE) {
+    logger.info(`Deleting file from Aliyun OSS: ${key}`);
+    const { deleteFromOSS } = await import("@/lib/uploads/oss/oss-client");
+    return deleteFromOSS(key);
+  }
+
   if (USE_BLOB_STORAGE) {
-    logger.info(`Deleting file from Azure Blob Storage: ${key}`)
-    const { deleteFromBlob } = await import('@/lib/uploads/blob/blob-client')
-    return deleteFromBlob(key)
+    logger.info(`Deleting file from Azure Blob Storage: ${key}`);
+    const { deleteFromBlob } = await import("@/lib/uploads/blob/blob-client");
+    return deleteFromBlob(key);
   }
 
   if (USE_S3_STORAGE) {
-    logger.info(`Deleting file from S3: ${key}`)
-    const { deleteFromS3 } = await import('@/lib/uploads/s3/s3-client')
-    return deleteFromS3(key)
+    logger.info(`Deleting file from S3: ${key}`);
+    const { deleteFromS3 } = await import("@/lib/uploads/s3/s3-client");
+    return deleteFromS3(key);
   }
 
   throw new Error(
-    'No storage provider configured. Set Azure credentials (AZURE_CONNECTION_STRING or AZURE_ACCOUNT_NAME + AZURE_ACCOUNT_KEY) or configure AWS credentials for S3.'
-  )
+    "No storage provider configured. Set Aliyun OSS credentials (OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET, OSS_BUCKET_NAME, OSS_REGION), Azure credentials (AZURE_CONNECTION_STRING or AZURE_ACCOUNT_NAME + AZURE_ACCOUNT_KEY), or configure AWS credentials for S3."
+  );
 }
 
 /**
@@ -148,22 +213,35 @@ export async function deleteFile(key: string): Promise<void> {
  * @param expiresIn Time in seconds until URL expires
  * @returns Presigned URL
  */
-export async function getPresignedUrl(key: string, expiresIn = 3600): Promise<string> {
+export async function getPresignedUrl(
+  key: string,
+  expiresIn = 3600
+): Promise<string> {
+  if (USE_OSS_STORAGE) {
+    logger.info(`Generating presigned URL for Aliyun OSS: ${key}`);
+    const { getOSSPresignedUrl } = await import("@/lib/uploads/oss/oss-client");
+    return getOSSPresignedUrl(key, expiresIn);
+  }
+
   if (USE_BLOB_STORAGE) {
-    logger.info(`Generating presigned URL for Azure Blob Storage: ${key}`)
-    const { getPresignedUrl: getBlobPresignedUrl } = await import('@/lib/uploads/blob/blob-client')
-    return getBlobPresignedUrl(key, expiresIn)
+    logger.info(`Generating presigned URL for Azure Blob Storage: ${key}`);
+    const { getPresignedUrl: getBlobPresignedUrl } = await import(
+      "@/lib/uploads/blob/blob-client"
+    );
+    return getBlobPresignedUrl(key, expiresIn);
   }
 
   if (USE_S3_STORAGE) {
-    logger.info(`Generating presigned URL for S3: ${key}`)
-    const { getPresignedUrl: getS3PresignedUrl } = await import('@/lib/uploads/s3/s3-client')
-    return getS3PresignedUrl(key, expiresIn)
+    logger.info(`Generating presigned URL for S3: ${key}`);
+    const { getPresignedUrl: getS3PresignedUrl } = await import(
+      "@/lib/uploads/s3/s3-client"
+    );
+    return getS3PresignedUrl(key, expiresIn);
   }
 
   throw new Error(
-    'No storage provider configured. Set Azure credentials (AZURE_CONNECTION_STRING or AZURE_ACCOUNT_NAME + AZURE_ACCOUNT_KEY) or configure AWS credentials for S3.'
-  )
+    "No storage provider configured. Set Aliyun OSS credentials (OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET, OSS_BUCKET_NAME, OSS_REGION), Azure credentials (AZURE_CONNECTION_STRING or AZURE_ACCOUNT_NAME + AZURE_ACCOUNT_KEY), or configure AWS credentials for S3."
+  );
 }
 
 /**
@@ -178,60 +256,78 @@ export async function getPresignedUrlWithConfig(
   customConfig: CustomStorageConfig,
   expiresIn = 3600
 ): Promise<string> {
+  if (USE_OSS_STORAGE) {
+    logger.info(
+      `Generating presigned URL for Aliyun OSS with custom config: ${key}`
+    );
+    const { getOSSPresignedUrl } = await import("@/lib/uploads/oss/oss-client");
+    // Convert CustomStorageConfig to CustomOSSConfig
+    const ossConfig: CustomOSSConfig = {
+      accessKeyId: customConfig.accessKeyId!,
+      accessKeySecret: customConfig.accessKeySecret!,
+      bucket: customConfig.bucket!,
+      region: customConfig.region!,
+      endpoint: customConfig.endpoint,
+    };
+    return getOSSPresignedUrl(key, expiresIn, ossConfig);
+  }
+
   if (USE_BLOB_STORAGE) {
-    logger.info(`Generating presigned URL for Azure Blob Storage with custom config: ${key}`)
-    const { getPresignedUrlWithConfig: getBlobPresignedUrlWithConfig } = await import(
-      '@/lib/uploads/blob/blob-client'
-    )
+    logger.info(
+      `Generating presigned URL for Azure Blob Storage with custom config: ${key}`
+    );
+    const { getPresignedUrlWithConfig: getBlobPresignedUrlWithConfig } =
+      await import("@/lib/uploads/blob/blob-client");
     // Convert CustomStorageConfig to CustomBlobConfig
     const blobConfig: CustomBlobConfig = {
       containerName: customConfig.containerName!,
       accountName: customConfig.accountName!,
       accountKey: customConfig.accountKey,
       connectionString: customConfig.connectionString,
-    }
-    return getBlobPresignedUrlWithConfig(key, blobConfig, expiresIn)
+    };
+    return getBlobPresignedUrlWithConfig(key, blobConfig, expiresIn);
   }
 
   if (USE_S3_STORAGE) {
-    logger.info(`Generating presigned URL for S3 with custom config: ${key}`)
-    const { getPresignedUrlWithConfig: getS3PresignedUrlWithConfig } = await import(
-      '@/lib/uploads/s3/s3-client'
-    )
+    logger.info(`Generating presigned URL for S3 with custom config: ${key}`);
+    const { getPresignedUrlWithConfig: getS3PresignedUrlWithConfig } =
+      await import("@/lib/uploads/s3/s3-client");
     // Convert CustomStorageConfig to CustomS3Config
     const s3Config: CustomS3Config = {
       bucket: customConfig.bucket!,
       region: customConfig.region!,
-    }
-    return getS3PresignedUrlWithConfig(key, s3Config, expiresIn)
+    };
+    return getS3PresignedUrlWithConfig(key, s3Config, expiresIn);
   }
 
   throw new Error(
-    'No storage provider configured. Set Azure credentials (AZURE_CONNECTION_STRING or AZURE_ACCOUNT_NAME + AZURE_ACCOUNT_KEY) or configure AWS credentials for S3.'
-  )
+    "No storage provider configured. Set Aliyun OSS credentials (OSS_ACCESS_KEY_ID, OSS_ACCESS_KEY_SECRET, OSS_BUCKET_NAME, OSS_REGION), Azure credentials (AZURE_CONNECTION_STRING or AZURE_ACCOUNT_NAME + AZURE_ACCOUNT_KEY), or configure AWS credentials for S3."
+  );
 }
 
 /**
  * Get the current storage provider name
  */
-export function getStorageProvider(): 'blob' | 's3' | 'local' {
-  if (USE_BLOB_STORAGE) return 'blob'
-  if (USE_S3_STORAGE) return 's3'
-  return 'local'
+export function getStorageProvider(): "oss" | "blob" | "s3" | "local" {
+  if (USE_OSS_STORAGE) return "oss";
+  if (USE_BLOB_STORAGE) return "blob";
+  if (USE_S3_STORAGE) return "s3";
+  return "local";
 }
 
 /**
- * Check if we're using cloud storage (either S3 or Blob)
+ * Check if we're using cloud storage (OSS, S3 or Blob)
  */
 export function isUsingCloudStorage(): boolean {
-  return USE_BLOB_STORAGE || USE_S3_STORAGE
+  return USE_OSS_STORAGE || USE_BLOB_STORAGE || USE_S3_STORAGE;
 }
 
 /**
  * Get the appropriate serve path prefix based on storage provider
  */
 export function getServePathPrefix(): string {
-  if (USE_BLOB_STORAGE) return '/api/files/serve/blob/'
-  if (USE_S3_STORAGE) return '/api/files/serve/s3/'
-  return '/api/files/serve/'
+  if (USE_OSS_STORAGE) return "/api/files/serve/oss/";
+  if (USE_BLOB_STORAGE) return "/api/files/serve/blob/";
+  if (USE_S3_STORAGE) return "/api/files/serve/s3/";
+  return "/api/files/serve/";
 }

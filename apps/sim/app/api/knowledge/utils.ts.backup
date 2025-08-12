@@ -569,9 +569,10 @@ export async function generateEmbeddings(
               `Final request body JSON length: ${finalRequestBodyJson.length} chars`
             );
 
-            // Try multiple API endpoints and formats
+            // Use the successful compatible mode endpoint directly
+            logger.info("Calling Qwen3-Embedding API via compatible mode...");
+
             let response;
-            let lastError;
 
             // First try: Standard Qwen API format
             try {

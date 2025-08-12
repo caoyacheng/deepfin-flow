@@ -59,7 +59,7 @@ export function Knowledge() {
     id: kb.id,
     title: kb.name,
     docCount: kb.docCount || 0,
-    description: kb.description || "No description provided",
+    description: kb.description || "未提供描述",
   });
 
   const breadcrumbs = [{ id: "knowledge", label: "Knowledge" }];

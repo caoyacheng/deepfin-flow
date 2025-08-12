@@ -82,6 +82,18 @@ function Hero() {
       className="animation-container relative min-h-screen overflow-hidden border-[#181818] border-b pt-28 text-white will-change-[opacity,transform] sm:pt-32 md:pt-40"
       aria-label="Main hero section"
     >
+      {/* Logo positioned in top-left corner */}
+      <div className="absolute top-6 left-16 z-30">
+        <div className="flex items-center gap-3">
+          {/* Logo image */}
+          <img
+            src="/Loongflow.png"
+            alt="Loongflow Logo"
+            className="w-48 h-48 object-contain"
+          />
+        </div>
+      </div>
+
       <GridPattern
         x={-5}
         y={-5}
@@ -139,7 +151,6 @@ function Hero() {
         </h1>
 
         <p className="animation-container mx-auto max-w-3xl animate-fade-up font-normal text-base text-neutral-400/80 leading-[1.5] tracking-normal opacity-0 will-change-[opacity,transform] [animation-delay:400ms] md:text-xl">
-          Loongflow <br />
           大模型驱动的智能工作流平台
         </p>
 

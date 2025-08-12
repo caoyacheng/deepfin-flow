@@ -1,33 +1,40 @@
-import { PutObjectCommand } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { type NextRequest, NextResponse } from 'next/server'
-import { v4 as uuidv4 } from 'uuid'
-import { createLogger } from '@/lib/logs/console/logger'
-import { getStorageProvider, isUsingCloudStorage } from '@/lib/uploads'
-// Dynamic imports for storage clients to avoid client-side bundling
+import { createLogger } from "@/lib/logs/console/logger";
+import { getStorageProvider, isUsingCloudStorage } from "@/lib/uploads";
 import {
   BLOB_CHAT_CONFIG,
   BLOB_CONFIG,
   BLOB_COPILOT_CONFIG,
   BLOB_KB_CONFIG,
+  OSS_CHAT_CONFIG,
+  OSS_CONFIG,
+  OSS_COPILOT_CONFIG,
+  OSS_KB_CONFIG,
   S3_CHAT_CONFIG,
   S3_CONFIG,
   S3_COPILOT_CONFIG,
   S3_KB_CONFIG,
-} from '@/lib/uploads/setup'
-import { createErrorResponse, createOptionsResponse } from '@/app/api/files/utils'
+} from "@/lib/uploads/setup";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { type NextRequest, NextResponse } from "next/server";
+import { v4 as uuidv4 } from "uuid";
+// Dynamic imports for storage clients to avoid client-side bundling
+import {
+  createErrorResponse,
+  createOptionsResponse,
+} from "@/app/api/files/utils";
 
-const logger = createLogger('PresignedUploadAPI')
+const logger = createLogger("PresignedUploadAPI");
 
 interface PresignedUrlRequest {
-  fileName: string
-  contentType: string
-  fileSize: number
-  userId?: string
-  chatId?: string
+  fileName: string;
+  contentType: string;
+  fileSize: number;
+  userId?: string;
+  chatId?: string;
 }
 
-type UploadType = 'general' | 'knowledge-base' | 'chat' | 'copilot'
+type UploadType = "general" | "knowledge-base" | "chat" | "copilot";
 
 class PresignedUrlError extends Error {
   constructor(
@@ -35,87 +42,111 @@ class PresignedUrlError extends Error {
     public code: string,
     public statusCode = 400
   ) {
-    super(message)
-    this.name = 'PresignedUrlError'
+    super(message);
+    this.name = "PresignedUrlError";
   }
 }
 
 class StorageConfigError extends PresignedUrlError {
   constructor(message: string) {
-    super(message, 'STORAGE_CONFIG_ERROR', 500)
+    super(message, "STORAGE_CONFIG_ERROR", 500);
   }
 }
 
 class ValidationError extends PresignedUrlError {
   constructor(message: string) {
-    super(message, 'VALIDATION_ERROR', 400)
+    super(message, "VALIDATION_ERROR", 400);
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    let data: PresignedUrlRequest
+    let data: PresignedUrlRequest;
     try {
-      data = await request.json()
+      data = await request.json();
     } catch {
-      throw new ValidationError('Invalid JSON in request body')
+      throw new ValidationError("Invalid JSON in request body");
     }
 
-    const { fileName, contentType, fileSize, userId, chatId } = data
+    const { fileName, contentType, fileSize, userId, chatId } = data;
 
     if (!fileName?.trim()) {
-      throw new ValidationError('fileName is required and cannot be empty')
+      throw new ValidationError("fileName is required and cannot be empty");
     }
     if (!contentType?.trim()) {
-      throw new ValidationError('contentType is required and cannot be empty')
+      throw new ValidationError("contentType is required and cannot be empty");
     }
     if (!fileSize || fileSize <= 0) {
-      throw new ValidationError('fileSize must be a positive number')
+      throw new ValidationError("fileSize must be a positive number");
     }
 
-    const MAX_FILE_SIZE = 100 * 1024 * 1024
+    const MAX_FILE_SIZE = 100 * 1024 * 1024;
     if (fileSize > MAX_FILE_SIZE) {
       throw new ValidationError(
         `File size (${fileSize} bytes) exceeds maximum allowed size (${MAX_FILE_SIZE} bytes)`
-      )
+      );
     }
 
-    const uploadTypeParam = request.nextUrl.searchParams.get('type')
+    const uploadTypeParam = request.nextUrl.searchParams.get("type");
     const uploadType: UploadType =
-      uploadTypeParam === 'knowledge-base'
-        ? 'knowledge-base'
-        : uploadTypeParam === 'chat'
-          ? 'chat'
-          : uploadTypeParam === 'copilot'
-            ? 'copilot'
-            : 'general'
+      uploadTypeParam === "knowledge-base"
+        ? "knowledge-base"
+        : uploadTypeParam === "chat"
+          ? "chat"
+          : uploadTypeParam === "copilot"
+            ? "copilot"
+            : "general";
 
     // Validate copilot-specific requirements
-    if (uploadType === 'copilot') {
+    if (uploadType === "copilot") {
       if (!userId?.trim()) {
-        throw new ValidationError('userId is required for copilot uploads')
+        throw new ValidationError("userId is required for copilot uploads");
       }
     }
 
     if (!isUsingCloudStorage()) {
       throw new StorageConfigError(
-        'Direct uploads are only available when cloud storage is enabled'
-      )
+        "Direct uploads are only available when cloud storage is enabled"
+      );
     }
 
-    const storageProvider = getStorageProvider()
-    logger.info(`Generating ${uploadType} presigned URL for ${fileName} using ${storageProvider}`)
+    const storageProvider = getStorageProvider();
+    logger.info(
+      `Generating ${uploadType} presigned URL for ${fileName} using ${storageProvider}`
+    );
 
     switch (storageProvider) {
-      case 's3':
-        return await handleS3PresignedUrl(fileName, contentType, fileSize, uploadType, userId)
-      case 'blob':
-        return await handleBlobPresignedUrl(fileName, contentType, fileSize, uploadType, userId)
+      case "oss":
+        return await handleOSSPresignedUrl(
+          fileName,
+          contentType,
+          fileSize,
+          uploadType,
+          userId
+        );
+      case "s3":
+        return await handleS3PresignedUrl(
+          fileName,
+          contentType,
+          fileSize,
+          uploadType,
+          userId
+        );
+      case "blob":
+        return await handleBlobPresignedUrl(
+          fileName,
+          contentType,
+          fileSize,
+          uploadType,
+          userId
+        );
       default:
-        throw new StorageConfigError(`Unknown storage provider: ${storageProvider}`)
+        throw new StorageConfigError(
+          `Unknown storage provider: ${storageProvider}`
+        );
     }
   } catch (error) {
-    logger.error('Error generating presigned URL:', error)
+    logger.error("Error generating presigned URL:", error);
 
     if (error instanceof PresignedUrlError) {
       return NextResponse.json(
@@ -125,12 +156,14 @@ export async function POST(request: NextRequest) {
           directUploadSupported: false,
         },
         { status: error.statusCode }
-      )
+      );
     }
 
     return createErrorResponse(
-      error instanceof Error ? error : new Error('Failed to generate presigned URL')
-    )
+      error instanceof Error
+        ? error
+        : new Error("Failed to generate presigned URL")
+    );
   }
 }
 
@@ -143,46 +176,52 @@ async function handleS3PresignedUrl(
 ) {
   try {
     const config =
-      uploadType === 'knowledge-base'
+      uploadType === "knowledge-base"
         ? S3_KB_CONFIG
-        : uploadType === 'chat'
+        : uploadType === "chat"
           ? S3_CHAT_CONFIG
-          : uploadType === 'copilot'
+          : uploadType === "copilot"
             ? S3_COPILOT_CONFIG
-            : S3_CONFIG
+            : S3_CONFIG;
 
     if (!config.bucket || !config.region) {
-      throw new StorageConfigError(`S3 configuration missing for ${uploadType} uploads`)
+      throw new StorageConfigError(
+        `S3 configuration missing for ${uploadType} uploads`
+      );
     }
 
-    const safeFileName = fileName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9.-]/g, '_')
+    const safeFileName = fileName
+      .replace(/\s+/g, "-")
+      .replace(/[^a-zA-Z0-9.-]/g, "_");
 
-    let prefix = ''
-    if (uploadType === 'knowledge-base') {
-      prefix = 'kb/'
-    } else if (uploadType === 'chat') {
-      prefix = 'chat/'
-    } else if (uploadType === 'copilot') {
-      prefix = `${userId}/`
+    let prefix = "";
+    if (uploadType === "knowledge-base") {
+      prefix = "kb/";
+    } else if (uploadType === "chat") {
+      prefix = "chat/";
+    } else if (uploadType === "copilot") {
+      prefix = `${userId}/`;
     }
 
-    const uniqueKey = `${prefix}${uuidv4()}-${safeFileName}`
+    const uniqueKey = `${prefix}${uuidv4()}-${safeFileName}`;
 
-    const { sanitizeFilenameForMetadata } = await import('@/lib/uploads/s3/s3-client')
-    const sanitizedOriginalName = sanitizeFilenameForMetadata(fileName)
+    const { sanitizeFilenameForMetadata } = await import(
+      "@/lib/uploads/s3/s3-client"
+    );
+    const sanitizedOriginalName = sanitizeFilenameForMetadata(fileName);
 
     const metadata: Record<string, string> = {
       originalName: sanitizedOriginalName,
       uploadedAt: new Date().toISOString(),
-    }
+    };
 
-    if (uploadType === 'knowledge-base') {
-      metadata.purpose = 'knowledge-base'
-    } else if (uploadType === 'chat') {
-      metadata.purpose = 'chat'
-    } else if (uploadType === 'copilot') {
-      metadata.purpose = 'copilot'
-      metadata.userId = userId || ''
+    if (uploadType === "knowledge-base") {
+      metadata.purpose = "knowledge-base";
+    } else if (uploadType === "chat") {
+      metadata.purpose = "chat";
+    } else if (uploadType === "copilot") {
+      metadata.purpose = "copilot";
+      metadata.userId = userId || "";
     }
 
     const command = new PutObjectCommand({
@@ -190,29 +229,33 @@ async function handleS3PresignedUrl(
       Key: uniqueKey,
       ContentType: contentType,
       Metadata: metadata,
-    })
+    });
 
-    let presignedUrl: string
+    let presignedUrl: string;
     try {
-      const { getS3Client } = await import('@/lib/uploads/s3/s3-client')
-      presignedUrl = await getSignedUrl(getS3Client(), command, { expiresIn: 3600 })
+      const { getS3Client } = await import("@/lib/uploads/s3/s3-client");
+      presignedUrl = await getSignedUrl(getS3Client(), command, {
+        expiresIn: 3600,
+      });
     } catch (s3Error) {
-      logger.error('Failed to generate S3 presigned URL:', s3Error)
+      logger.error("Failed to generate S3 presigned URL:", s3Error);
       throw new StorageConfigError(
-        'Failed to generate S3 presigned URL - check AWS credentials and permissions'
-      )
+        "Failed to generate S3 presigned URL - check AWS credentials and permissions"
+      );
     }
 
     // For chat images, use direct S3 URLs since they need to be permanently accessible
     // For other files, use serve path for access control
     const finalPath =
-      uploadType === 'chat'
+      uploadType === "chat"
         ? `https://${config.bucket}.s3.${config.region}.amazonaws.com/${uniqueKey}`
-        : `/api/files/serve/s3/${encodeURIComponent(uniqueKey)}`
+        : `/api/files/serve/s3/${encodeURIComponent(uniqueKey)}`;
 
-    logger.info(`Generated ${uploadType} S3 presigned URL for ${fileName} (${uniqueKey})`)
-    logger.info(`Presigned URL: ${presignedUrl}`)
-    logger.info(`Final path: ${finalPath}`)
+    logger.info(
+      `Generated ${uploadType} S3 presigned URL for ${fileName} (${uniqueKey})`
+    );
+    logger.info(`Presigned URL: ${presignedUrl}`);
+    logger.info(`Final path: ${finalPath}`);
 
     return NextResponse.json({
       presignedUrl,
@@ -225,13 +268,13 @@ async function handleS3PresignedUrl(
         type: contentType,
       },
       directUploadSupported: true,
-    })
+    });
   } catch (error) {
     if (error instanceof PresignedUrlError) {
-      throw error
+      throw error;
     }
-    logger.error('Error in S3 presigned URL generation:', error)
-    throw new StorageConfigError('Failed to generate S3 presigned URL')
+    logger.error("Error in S3 presigned URL generation:", error);
+    throw new StorageConfigError("Failed to generate S3 presigned URL");
   }
 }
 
@@ -244,89 +287,105 @@ async function handleBlobPresignedUrl(
 ) {
   try {
     const config =
-      uploadType === 'knowledge-base'
+      uploadType === "knowledge-base"
         ? BLOB_KB_CONFIG
-        : uploadType === 'chat'
+        : uploadType === "chat"
           ? BLOB_CHAT_CONFIG
-          : uploadType === 'copilot'
+          : uploadType === "copilot"
             ? BLOB_COPILOT_CONFIG
-            : BLOB_CONFIG
+            : BLOB_CONFIG;
 
     if (
       !config.accountName ||
       !config.containerName ||
       (!config.accountKey && !config.connectionString)
     ) {
-      throw new StorageConfigError(`Azure Blob configuration missing for ${uploadType} uploads`)
+      throw new StorageConfigError(
+        `Azure Blob configuration missing for ${uploadType} uploads`
+      );
     }
 
-    const safeFileName = fileName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9.-]/g, '_')
+    const safeFileName = fileName
+      .replace(/\s+/g, "-")
+      .replace(/[^a-zA-Z0-9.-]/g, "_");
 
-    let prefix = ''
-    if (uploadType === 'knowledge-base') {
-      prefix = 'kb/'
-    } else if (uploadType === 'chat') {
-      prefix = 'chat/'
-    } else if (uploadType === 'copilot') {
-      prefix = `${userId}/`
+    let prefix = "";
+    if (uploadType === "knowledge-base") {
+      prefix = "kb/";
+    } else if (uploadType === "chat") {
+      prefix = "chat/";
+    } else if (uploadType === "copilot") {
+      prefix = `${userId}/`;
     }
 
-    const uniqueKey = `${prefix}${uuidv4()}-${safeFileName}`
+    const uniqueKey = `${prefix}${uuidv4()}-${safeFileName}`;
 
-    const { getBlobServiceClient } = await import('@/lib/uploads/blob/blob-client')
-    const blobServiceClient = getBlobServiceClient()
-    const containerClient = blobServiceClient.getContainerClient(config.containerName)
-    const blockBlobClient = containerClient.getBlockBlobClient(uniqueKey)
+    const { getBlobServiceClient } = await import(
+      "@/lib/uploads/blob/blob-client"
+    );
+    const blobServiceClient = getBlobServiceClient();
+    const containerClient = blobServiceClient.getContainerClient(
+      config.containerName
+    );
+    const blockBlobClient = containerClient.getBlockBlobClient(uniqueKey);
 
-    const { BlobSASPermissions, generateBlobSASQueryParameters, StorageSharedKeyCredential } =
-      await import('@azure/storage-blob')
+    const {
+      BlobSASPermissions,
+      generateBlobSASQueryParameters,
+      StorageSharedKeyCredential,
+    } = await import("@azure/storage-blob");
 
     const sasOptions = {
       containerName: config.containerName,
       blobName: uniqueKey,
-      permissions: BlobSASPermissions.parse('w'), // Write permission for upload
+      permissions: BlobSASPermissions.parse("w"), // Write permission for upload
       startsOn: new Date(),
       expiresOn: new Date(Date.now() + 3600 * 1000), // 1 hour expiration
-    }
+    };
 
-    let sasToken: string
+    let sasToken: string;
     try {
       sasToken = generateBlobSASQueryParameters(
         sasOptions,
-        new StorageSharedKeyCredential(config.accountName, config.accountKey || '')
-      ).toString()
+        new StorageSharedKeyCredential(
+          config.accountName,
+          config.accountKey || ""
+        )
+      ).toString();
     } catch (blobError) {
-      logger.error('Failed to generate Azure Blob SAS token:', blobError)
+      logger.error("Failed to generate Azure Blob SAS token:", blobError);
       throw new StorageConfigError(
-        'Failed to generate Azure Blob SAS token - check Azure credentials and permissions'
-      )
+        "Failed to generate Azure Blob SAS token - check Azure credentials and permissions"
+      );
     }
 
-    const presignedUrl = `${blockBlobClient.url}?${sasToken}`
+    const presignedUrl = `${blockBlobClient.url}?${sasToken}`;
 
     // For chat images, use direct Blob URLs since they need to be permanently accessible
     // For other files, use serve path for access control
     const finalPath =
-      uploadType === 'chat'
+      uploadType === "chat"
         ? blockBlobClient.url
-        : `/api/files/serve/blob/${encodeURIComponent(uniqueKey)}`
+        : `/api/files/serve/blob/${encodeURIComponent(uniqueKey)}`;
 
-    logger.info(`Generated ${uploadType} Azure Blob presigned URL for ${fileName} (${uniqueKey})`)
+    logger.info(
+      `Generated ${uploadType} Azure Blob presigned URL for ${fileName} (${uniqueKey})`
+    );
 
     const uploadHeaders: Record<string, string> = {
-      'x-ms-blob-type': 'BlockBlob',
-      'x-ms-blob-content-type': contentType,
-      'x-ms-meta-originalname': encodeURIComponent(fileName),
-      'x-ms-meta-uploadedat': new Date().toISOString(),
-    }
+      "x-ms-blob-type": "BlockBlob",
+      "x-ms-blob-content-type": contentType,
+      "x-ms-meta-originalname": encodeURIComponent(fileName),
+      "x-ms-meta-uploadedat": new Date().toISOString(),
+    };
 
-    if (uploadType === 'knowledge-base') {
-      uploadHeaders['x-ms-meta-purpose'] = 'knowledge-base'
-    } else if (uploadType === 'chat') {
-      uploadHeaders['x-ms-meta-purpose'] = 'chat'
-    } else if (uploadType === 'copilot') {
-      uploadHeaders['x-ms-meta-purpose'] = 'copilot'
-      uploadHeaders['x-ms-meta-userid'] = encodeURIComponent(userId || '')
+    if (uploadType === "knowledge-base") {
+      uploadHeaders["x-ms-meta-purpose"] = "knowledge-base";
+    } else if (uploadType === "chat") {
+      uploadHeaders["x-ms-meta-purpose"] = "chat";
+    } else if (uploadType === "copilot") {
+      uploadHeaders["x-ms-meta-purpose"] = "copilot";
+      uploadHeaders["x-ms-meta-userid"] = encodeURIComponent(userId || "");
     }
 
     return NextResponse.json({
@@ -340,16 +399,112 @@ async function handleBlobPresignedUrl(
       },
       directUploadSupported: true,
       uploadHeaders,
-    })
+    });
   } catch (error) {
     if (error instanceof PresignedUrlError) {
-      throw error
+      throw error;
     }
-    logger.error('Error in Azure Blob presigned URL generation:', error)
-    throw new StorageConfigError('Failed to generate Azure Blob presigned URL')
+    logger.error("Error in Azure Blob presigned URL generation:", error);
+    throw new StorageConfigError("Failed to generate Azure Blob presigned URL");
+  }
+}
+
+async function handleOSSPresignedUrl(
+  fileName: string,
+  contentType: string,
+  fileSize: number,
+  uploadType: UploadType,
+  userId?: string
+) {
+  try {
+    const config =
+      uploadType === "knowledge-base"
+        ? OSS_KB_CONFIG
+        : uploadType === "chat"
+          ? OSS_CHAT_CONFIG
+          : uploadType === "copilot"
+            ? OSS_COPILOT_CONFIG
+            : OSS_CONFIG;
+
+    if (
+      !config.accessKeyId ||
+      !config.accessKeySecret ||
+      !config.bucket ||
+      !config.region
+    ) {
+      throw new StorageConfigError(
+        `OSS configuration missing for ${uploadType} uploads`
+      );
+    }
+
+    const safeFileName = fileName
+      .replace(/\s+/g, "-")
+      .replace(/[^a-zA-Z0-9.-]/g, "_");
+
+    let prefix = "";
+    if (uploadType === "knowledge-base") {
+      prefix = "kb/";
+    } else if (uploadType === "chat") {
+      prefix = "chat/";
+    } else if (uploadType === "copilot") {
+      prefix = `${userId}/`;
+    }
+
+    const uniqueKey = `${prefix}${uuidv4()}-${safeFileName}`;
+
+    const { getOSSUploadPresignedUrl } = await import(
+      "@/lib/uploads/oss/oss-client"
+    );
+
+    let presignedUrl: string;
+    try {
+      presignedUrl = await getOSSUploadPresignedUrl(
+        uniqueKey,
+        contentType,
+        3600,
+        config
+      );
+    } catch (ossError) {
+      logger.error("Failed to generate OSS presigned URL:", ossError);
+      throw new StorageConfigError(
+        "Failed to generate OSS presigned URL - check Aliyun credentials and permissions"
+      );
+    }
+
+    // For chat images, use direct OSS URLs since they need to be permanently accessible
+    // For other files, use serve path for access control
+    const finalPath =
+      uploadType === "chat"
+        ? `https://${config.bucket}.${config.region}.aliyuncs.com/${uniqueKey}`
+        : `/api/files/serve/oss/${encodeURIComponent(uniqueKey)}`;
+
+    logger.info(
+      `Generated ${uploadType} OSS presigned URL for ${fileName} (${uniqueKey})`
+    );
+    logger.info(`Presigned URL: ${presignedUrl}`);
+    logger.info(`Final path: ${finalPath}`);
+
+    return NextResponse.json({
+      presignedUrl,
+      uploadUrl: presignedUrl,
+      fileInfo: {
+        path: finalPath,
+        key: uniqueKey,
+        name: fileName,
+        size: fileSize,
+        type: contentType,
+      },
+      directUploadSupported: true,
+    });
+  } catch (error) {
+    if (error instanceof PresignedUrlError) {
+      throw error;
+    }
+    logger.error("Error in OSS presigned URL generation:", error);
+    throw new StorageConfigError("Failed to generate OSS presigned URL");
   }
 }
 
 export async function OPTIONS() {
-  return createOptionsResponse()
+  return createOptionsResponse();
 }

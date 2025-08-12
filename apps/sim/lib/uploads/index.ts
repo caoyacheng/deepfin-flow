@@ -5,22 +5,28 @@ export {
   BLOB_CHAT_CONFIG,
   BLOB_CONFIG,
   BLOB_KB_CONFIG,
+  OSS_CHAT_CONFIG,
+  OSS_CONFIG,
+  OSS_COPILOT_CONFIG,
+  OSS_EXECUTION_FILES_CONFIG,
+  OSS_KB_CONFIG,
   S3_CHAT_CONFIG,
   S3_CONFIG,
   S3_KB_CONFIG,
   UPLOAD_DIR,
   USE_BLOB_STORAGE,
+  USE_OSS_STORAGE,
   USE_S3_STORAGE,
-} from '@/lib/uploads/setup'
+} from "@/lib/uploads/setup";
 export {
-  type CustomStorageConfig,
   deleteFile,
   downloadFile,
-  type FileInfo,
   getPresignedUrl,
   getPresignedUrlWithConfig,
   getServePathPrefix,
   getStorageProvider,
   isUsingCloudStorage,
   uploadFile,
-} from '@/lib/uploads/storage-client'
+  type CustomStorageConfig,
+  type FileInfo,
+} from "@/lib/uploads/storage-client";
