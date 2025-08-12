@@ -95,6 +95,35 @@ export const providers: Record<
     models: getProviderModelsFromDefinitions("ollama"),
     modelPatterns: PROVIDER_DEFINITIONS.ollama.modelPatterns,
   },
+  qwen: {
+    id: "qwen",
+    name: "Qwen",
+    description: "Alibaba Cloud's Qwen models",
+    version: "1.0.0",
+    models: getProviderModelsFromDefinitions("qwen"),
+    defaultModel: getProviderModelsFromDefinitions("qwen")[0] || "qwen-turbo",
+    modelPatterns: PROVIDER_DEFINITIONS.qwen.modelPatterns,
+    executeRequest: async (request) => {
+      // Dynamic import to avoid circular dependency
+      const { qwenProvider } = await import("./qwen");
+      return qwenProvider.executeRequest(request);
+    },
+  },
+  kimi: {
+    id: "kimi",
+    name: "Kimi",
+    description: "Moonshot AI's Kimi models",
+    version: "1.0.0",
+    models: getProviderModelsFromDefinitions("kimi"),
+    defaultModel:
+      getProviderModelsFromDefinitions("kimi")[0] || "moonshot-v1-8k",
+    modelPatterns: PROVIDER_DEFINITIONS.kimi.modelPatterns,
+    executeRequest: async (request) => {
+      // Dynamic import to avoid circular dependency
+      const { kimiProvider } = await import("./kimi");
+      return kimiProvider.executeRequest(request);
+    },
+  },
 };
 
 // Initialize all providers that have initialize method

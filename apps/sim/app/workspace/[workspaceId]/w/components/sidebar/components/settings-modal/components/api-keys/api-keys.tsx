@@ -184,10 +184,9 @@ export function ApiKeys({ onOpenChange }: ApiKeysProps) {
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
               <KeySquare className="h-6 w-6 text-primary" />
             </div>
-            <h3 className="mt-4 font-medium text-lg">No API keys yet</h3>
+            <h3 className="mt-4 font-medium text-lg">暂无 API Key</h3>
             <p className="mt-2 max-w-sm text-muted-foreground text-sm">
-              You don&apos;t have any API keys yet. Create one to get started
-              with the Sim SDK.
+              您还没有创建任何 API Key。请点击下方按钮创建一个。
             </p>
             <Button
               variant="default"
@@ -195,7 +194,7 @@ export function ApiKeys({ onOpenChange }: ApiKeysProps) {
               onClick={() => setIsCreating(true)}
               size="sm"
             >
-              <Plus className="mr-1.5 h-4 w-4" /> Create API Key
+              <Plus className="mr-1.5 h-4 w-4" /> 创建 API Key
             </Button>
           </div>
         </div>
@@ -310,8 +309,7 @@ export function ApiKeys({ onOpenChange }: ApiKeysProps) {
                   </Button>
                 </div>
                 <p className="mt-1 text-muted-foreground text-xs">
-                  For security, we don&apos;t store the complete key. You
-                  won&apos;t be able to view it again.
+                  出于安全考虑，我们不会存储完整的密钥。您将无法再次查看它。
                 </p>
               </div>
             </div>
@@ -323,7 +321,7 @@ export function ApiKeys({ onOpenChange }: ApiKeysProps) {
                 setNewKey(null);
               }}
             >
-              Close
+              关闭
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -333,27 +331,26 @@ export function ApiKeys({ onOpenChange }: ApiKeysProps) {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent className="sm:max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete API Key</AlertDialogTitle>
+            <AlertDialogTitle>删除 API Key</AlertDialogTitle>
             <AlertDialogDescription>
               {deleteKey && (
                 <>
-                  Are you sure you want to delete the API key{" "}
-                  <span className="font-semibold">{deleteKey.name}</span>? This
-                  action cannot be undone and any integrations using this key
-                  will no longer work.
+                  您确定要删除 API Key{" "}
+                  <span className="font-semibold">{deleteKey.name}</span> 吗？
+                  此操作无法撤销，并且任何使用此 API Key 的应用都将停止工作。
                 </>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:justify-end">
             <AlertDialogCancel onClick={() => setDeleteKey(null)}>
-              Cancel
+              取消
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteKey}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              删除
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

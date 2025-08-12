@@ -143,10 +143,10 @@ Create a system prompt appropriately detailed for the request, using clear langu
     },
     {
       id: "memories",
-      title: "Memories",
+      title: "记忆",
       type: "short-input",
       layout: "full",
-      placeholder: "Connect memory block output...",
+      placeholder: "输入记忆",
       mode: "advanced",
     },
     {
