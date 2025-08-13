@@ -6,7 +6,7 @@ export const KnowledgeBlock: BlockConfig = {
   name: "知识库",
   description: "Use vector search",
   longDescription:
-    "Perform semantic vector search across knowledge bases, upload individual chunks to existing documents, or create new documents from text content. Uses advanced AI embeddings to understand meaning and context for search operations.",
+    "在知识库中执行语义向量搜索，可将文本内容作为分块上传到已有文档，或创建新文档。利用先进的 AI 向量嵌入理解语义和上下文，实现高效搜索操作。",
   bgColor: "#00B0B0",
   icon: PackageSearchIcon,
   category: "blocks",
@@ -14,22 +14,22 @@ export const KnowledgeBlock: BlockConfig = {
   subBlocks: [
     {
       id: "operation",
-      title: "Operation",
+      title: "操作",
       type: "dropdown",
       layout: "full",
       options: [
-        { label: "Search", id: "search" },
-        { label: "Upload Chunk", id: "upload_chunk" },
-        { label: "Create Document", id: "create_document" },
+        { label: "搜索", id: "search" },
+        { label: "上传分块", id: "upload_chunk" },
+        { label: "创建文档", id: "create_document" },
       ],
       value: () => "search",
     },
     {
       id: "knowledgeBaseId",
-      title: "Knowledge Base",
+      title: "知识库",
       type: "knowledge-base-selector",
       layout: "full",
-      placeholder: "Select knowledge base",
+      placeholder: "请选择知识库（必填）",
       multiSelect: false,
       required: true,
       condition: {
@@ -39,64 +39,64 @@ export const KnowledgeBlock: BlockConfig = {
     },
     {
       id: "query",
-      title: "Search Query",
+      title: "搜索查询",
       type: "short-input",
       layout: "full",
-      placeholder: "Enter your search query (optional when using tag filters)",
+      placeholder: "请输入搜索查询（可选，使用标签过滤时）",
       required: false,
       condition: { field: "operation", value: "search" },
     },
     {
       id: "topK",
-      title: "Number of Results",
+      title: "返回结果数量",
       type: "short-input",
       layout: "full",
-      placeholder: "Enter number of results (default: 10)",
+      placeholder: "请输入要返回的结果数量（默认：10）",
       condition: { field: "operation", value: "search" },
     },
     {
       id: "tagFilters",
-      title: "Tag Filters",
+      title: "标签过滤",
       type: "knowledge-tag-filters",
       layout: "full",
-      placeholder: "Add tag filters",
+      placeholder: "请添加标签过滤条件",
       condition: { field: "operation", value: "search" },
       mode: "advanced",
     },
     {
       id: "documentId",
-      title: "Document",
+      title: "文档",
       type: "document-selector",
       layout: "full",
-      placeholder: "Select document",
+      placeholder: "请选择文档（必填）",
       required: true,
       condition: { field: "operation", value: "upload_chunk" },
     },
     {
       id: "content",
-      title: "Chunk Content",
+      title: "分块内容",
       type: "long-input",
       layout: "full",
-      placeholder: "Enter the chunk content to upload",
+      placeholder: "请输入要上传的分块内容（必填）",
       rows: 6,
       required: true,
       condition: { field: "operation", value: "upload_chunk" },
     },
     {
       id: "name",
-      title: "Document Name",
+      title: "文档名称",
       type: "short-input",
       layout: "full",
-      placeholder: "Enter document name",
+      placeholder: "请输入文档名称（必填）",
       required: true,
       condition: { field: "operation", value: ["create_document"] },
     },
     {
       id: "content",
-      title: "Document Content",
+      title: "文档内容",
       type: "long-input",
       layout: "full",
-      placeholder: "Enter the document content",
+      placeholder: "请输入文档内容（必填）",
       rows: 6,
       required: true,
       condition: { field: "operation", value: ["create_document"] },
@@ -104,7 +104,7 @@ export const KnowledgeBlock: BlockConfig = {
     // Dynamic tag entry for Create Document
     {
       id: "documentTags",
-      title: "Document Tags",
+      title: "文档标签",
       type: "document-tag-entry",
       layout: "full",
       condition: { field: "operation", value: "create_document" },
@@ -132,19 +132,17 @@ export const KnowledgeBlock: BlockConfig = {
       params: (params) => {
         // Validate required fields for each operation
         if (params.operation === "search" && !params.knowledgeBaseId) {
-          throw new Error("Knowledge base ID is required for search operation");
+          throw new Error("搜索操作需要知识库ID");
         }
         if (
           (params.operation === "upload_chunk" ||
             params.operation === "create_document") &&
           !params.knowledgeBaseId
         ) {
-          throw new Error(
-            "Knowledge base ID is required for upload_chunk and create_document operations"
-          );
+          throw new Error("上传分块和创建文档操作需要知识库ID");
         }
         if (params.operation === "upload_chunk" && !params.documentId) {
-          throw new Error("Document ID is required for upload_chunk operation");
+          throw new Error("上传分块操作需要文档ID");
         }
 
         return params;
@@ -152,24 +150,24 @@ export const KnowledgeBlock: BlockConfig = {
     },
   },
   inputs: {
-    operation: { type: "string", description: "Operation to perform" },
+    operation: { type: "string", description: "执行的操作" },
     knowledgeBaseId: {
       type: "string",
-      description: "Knowledge base identifier",
+      description: "知识库标识符",
     },
-    query: { type: "string", description: "Search query terms" },
-    topK: { type: "number", description: "Number of results" },
-    documentId: { type: "string", description: "Document identifier" },
-    content: { type: "string", description: "Content data" },
-    name: { type: "string", description: "Document name" },
+    query: { type: "string", description: "搜索查询" },
+    topK: { type: "number", description: "返回结果数量" },
+    documentId: { type: "string", description: "文档标识符" },
+    content: { type: "string", description: "内容数据" },
+    name: { type: "string", description: "文档名称" },
     // Dynamic tag filters for search
-    tagFilters: { type: "string", description: "Tag filter criteria" },
+    tagFilters: { type: "string", description: "标签过滤条件" },
     // Document tags for create document (JSON string of tag objects)
-    documentTags: { type: "string", description: "Document tags" },
+    documentTags: { type: "string", description: "文档标签" },
   },
   outputs: {
-    results: { type: "json", description: "Search results" },
-    query: { type: "string", description: "Query used" },
-    totalResults: { type: "number", description: "Total results count" },
+    results: { type: "json", description: "搜索结果" },
+    query: { type: "string", description: "使用的查询" },
+    totalResults: { type: "number", description: "总结果数量" },
   },
 };

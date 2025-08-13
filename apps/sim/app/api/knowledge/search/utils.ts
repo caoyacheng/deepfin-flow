@@ -1,84 +1,89 @@
-import { and, eq, inArray, sql } from 'drizzle-orm'
-import { retryWithExponentialBackoff } from '@/lib/documents/utils'
-import { env } from '@/lib/env'
-import { createLogger } from '@/lib/logs/console/logger'
-import { db } from '@/db'
-import { embedding } from '@/db/schema'
+import { db } from "@/db";
+import { embedding } from "@/db/schema";
+import { retryWithExponentialBackoff } from "@/lib/documents/utils";
+import { env } from "@/lib/env";
+import { createLogger } from "@/lib/logs/console/logger";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
-const logger = createLogger('KnowledgeSearchUtils')
+const logger = createLogger("KnowledgeSearchUtils");
 
 export class APIError extends Error {
-  public status: number
+  public status: number;
 
   constructor(message: string, status: number) {
-    super(message)
-    this.name = 'APIError'
-    this.status = status
+    super(message);
+    this.name = "APIError";
+    this.status = status;
   }
 }
 
 export interface SearchResult {
-  id: string
-  content: string
-  documentId: string
-  chunkIndex: number
-  tag1: string | null
-  tag2: string | null
-  tag3: string | null
-  tag4: string | null
-  tag5: string | null
-  tag6: string | null
-  tag7: string | null
-  distance: number
-  knowledgeBaseId: string
+  id: string;
+  content: string;
+  documentId: string;
+  chunkIndex: number;
+  tag1: string | null;
+  tag2: string | null;
+  tag3: string | null;
+  tag4: string | null;
+  tag5: string | null;
+  tag6: string | null;
+  tag7: string | null;
+  distance: number;
+  knowledgeBaseId: string;
 }
 
 export interface SearchParams {
-  knowledgeBaseIds: string[]
-  topK: number
-  filters?: Record<string, string>
-  queryVector?: string
-  distanceThreshold?: number
+  knowledgeBaseIds: string[];
+  topK: number;
+  filters?: Record<string, string>;
+  queryVector?: string;
+  distanceThreshold?: number;
 }
 
-export async function generateSearchEmbedding(query: string): Promise<number[]> {
-  const openaiApiKey = env.OPENAI_API_KEY
-  if (!openaiApiKey) {
-    throw new Error('OPENAI_API_KEY not configured')
+export async function generateSearchEmbedding(
+  query: string
+): Promise<number[]> {
+  const dashscopeApiKey = env.DASHSCOPE_API_KEY;
+  if (!dashscopeApiKey) {
+    throw new Error("DASHSCOPE_API_KEY not configured");
   }
 
   try {
     const embedding = await retryWithExponentialBackoff(
       async () => {
-        const response = await fetch('https://api.openai.com/v1/embeddings', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${openaiApiKey}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            input: query,
-            model: 'text-embedding-3-small',
-            encoding_format: 'float',
-          }),
-        })
+        const response = await fetch(
+          "https://dashscope.aliyuncs.com/api/v1/services/embeddings/text-embedding-v4/text-embedding",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${dashscopeApiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              input: query,
+              model: "text-embedding-v4",
+              encoding_format: "float",
+            }),
+          }
+        );
 
         if (!response.ok) {
-          const errorText = await response.text()
+          const errorText = await response.text();
           const error = new APIError(
             `OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`,
             response.status
-          )
-          throw error
+          );
+          throw error;
         }
 
-        const data = await response.json()
+        const data = await response.json();
 
         if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
-          throw new Error('Invalid response format from OpenAI embeddings API')
+          throw new Error("Invalid response format from OpenAI embeddings API");
         }
 
-        return data.data[0].embedding
+        return data.data[0].embedding;
       },
       {
         maxRetries: 5,
@@ -86,70 +91,75 @@ export async function generateSearchEmbedding(query: string): Promise<number[]> 
         maxDelayMs: 30000,
         backoffMultiplier: 2,
       }
-    )
+    );
 
-    return embedding
+    return embedding;
   } catch (error) {
-    logger.error('Failed to generate search embedding:', error)
+    logger.error("Failed to generate search embedding:", error);
     throw new Error(
-      `Embedding generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
-    )
+      `Embedding generation failed: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
   }
 }
 
 function getTagFilters(filters: Record<string, string>, embedding: any) {
   return Object.entries(filters).map(([key, value]) => {
     // Handle OR logic within same tag
-    const values = value.includes('|OR|') ? value.split('|OR|') : [value]
-    logger.debug(`[getTagFilters] Processing ${key}="${value}" -> values:`, values)
+    const values = value.includes("|OR|") ? value.split("|OR|") : [value];
+    logger.debug(
+      `[getTagFilters] Processing ${key}="${value}" -> values:`,
+      values
+    );
 
     const getColumnForKey = (key: string) => {
       switch (key) {
-        case 'tag1':
-          return embedding.tag1
-        case 'tag2':
-          return embedding.tag2
-        case 'tag3':
-          return embedding.tag3
-        case 'tag4':
-          return embedding.tag4
-        case 'tag5':
-          return embedding.tag5
-        case 'tag6':
-          return embedding.tag6
-        case 'tag7':
-          return embedding.tag7
+        case "tag1":
+          return embedding.tag1;
+        case "tag2":
+          return embedding.tag2;
+        case "tag3":
+          return embedding.tag3;
+        case "tag4":
+          return embedding.tag4;
+        case "tag5":
+          return embedding.tag5;
+        case "tag6":
+          return embedding.tag6;
+        case "tag7":
+          return embedding.tag7;
         default:
-          return null
+          return null;
       }
-    }
+    };
 
-    const column = getColumnForKey(key)
-    if (!column) return sql`1=1` // No-op for unknown keys
+    const column = getColumnForKey(key);
+    if (!column) return sql`1=1`; // No-op for unknown keys
 
     if (values.length === 1) {
       // Single value - simple equality
-      logger.debug(`[getTagFilters] Single value filter: ${key} = ${values[0]}`)
-      return sql`LOWER(${column}) = LOWER(${values[0]})`
+      logger.debug(
+        `[getTagFilters] Single value filter: ${key} = ${values[0]}`
+      );
+      return sql`LOWER(${column}) = LOWER(${values[0]})`;
     }
     // Multiple values - OR logic
-    logger.debug(`[getTagFilters] OR filter: ${key} IN (${values.join(', ')})`)
-    const orConditions = values.map((v) => sql`LOWER(${column}) = LOWER(${v})`)
-    return sql`(${sql.join(orConditions, sql` OR `)})`
-  })
+    logger.debug(`[getTagFilters] OR filter: ${key} IN (${values.join(", ")})`);
+    const orConditions = values.map((v) => sql`LOWER(${column}) = LOWER(${v})`);
+    return sql`(${sql.join(orConditions, sql` OR `)})`;
+  });
 }
 
 export function getQueryStrategy(kbCount: number, topK: number) {
-  const useParallel = kbCount > 4 || (kbCount > 2 && topK > 50)
-  const distanceThreshold = kbCount > 3 ? 0.8 : 1.0
-  const parallelLimit = Math.ceil(topK / kbCount) + 5
+  const useParallel = kbCount > 4 || (kbCount > 2 && topK > 50);
+  const distanceThreshold = kbCount > 3 ? 0.8 : 1.0;
+  const parallelLimit = Math.ceil(topK / kbCount) + 5;
 
   return {
     useParallel,
     distanceThreshold,
     parallelLimit,
     singleQueryOptimized: kbCount <= 2,
-  }
+  };
 }
 
 async function executeTagFilterQuery(
@@ -166,7 +176,7 @@ async function executeTagFilterQuery(
           eq(embedding.enabled, true),
           ...getTagFilters(filters, embedding)
         )
-      )
+      );
   }
   return await db
     .select({ id: embedding.id })
@@ -177,7 +187,7 @@ async function executeTagFilterQuery(
         eq(embedding.enabled, true),
         ...getTagFilters(filters, embedding)
       )
-    )
+    );
 }
 
 async function executeVectorSearchOnIds(
@@ -187,7 +197,7 @@ async function executeVectorSearchOnIds(
   distanceThreshold: number
 ): Promise<SearchResult[]> {
   if (embeddingIds.length === 0) {
-    return []
+    return [];
   }
 
   return await db
@@ -203,7 +213,10 @@ async function executeVectorSearchOnIds(
       tag5: embedding.tag5,
       tag6: embedding.tag6,
       tag7: embedding.tag7,
-      distance: sql<number>`${embedding.embedding} <=> ${queryVector}::vector`.as('distance'),
+      distance:
+        sql<number>`${embedding.embedding} <=> ${queryVector}::vector`.as(
+          "distance"
+        ),
       knowledgeBaseId: embedding.knowledgeBaseId,
     })
     .from(embedding)
@@ -214,23 +227,28 @@ async function executeVectorSearchOnIds(
       )
     )
     .orderBy(sql`${embedding.embedding} <=> ${queryVector}::vector`)
-    .limit(topK)
+    .limit(topK);
 }
 
-export async function handleTagOnlySearch(params: SearchParams): Promise<SearchResult[]> {
-  const { knowledgeBaseIds, topK, filters } = params
+export async function handleTagOnlySearch(
+  params: SearchParams
+): Promise<SearchResult[]> {
+  const { knowledgeBaseIds, topK, filters } = params;
 
   if (!filters || Object.keys(filters).length === 0) {
-    throw new Error('Tag filters are required for tag-only search')
+    throw new Error("Tag filters are required for tag-only search");
   }
 
-  logger.debug(`[handleTagOnlySearch] Executing tag-only search with filters:`, filters)
+  logger.debug(
+    `[handleTagOnlySearch] Executing tag-only search with filters:`,
+    filters
+  );
 
-  const strategy = getQueryStrategy(knowledgeBaseIds.length, topK)
+  const strategy = getQueryStrategy(knowledgeBaseIds.length, topK);
 
   if (strategy.useParallel) {
     // Parallel approach for many KBs
-    const parallelLimit = Math.ceil(topK / knowledgeBaseIds.length) + 5
+    const parallelLimit = Math.ceil(topK / knowledgeBaseIds.length) + 5;
 
     const queryPromises = knowledgeBaseIds.map(async (kbId) => {
       return await db
@@ -246,7 +264,7 @@ export async function handleTagOnlySearch(params: SearchParams): Promise<SearchR
           tag5: embedding.tag5,
           tag6: embedding.tag6,
           tag7: embedding.tag7,
-          distance: sql<number>`0`.as('distance'), // No distance for tag-only searches
+          distance: sql<number>`0`.as("distance"), // No distance for tag-only searches
           knowledgeBaseId: embedding.knowledgeBaseId,
         })
         .from(embedding)
@@ -257,11 +275,11 @@ export async function handleTagOnlySearch(params: SearchParams): Promise<SearchR
             ...getTagFilters(filters, embedding)
           )
         )
-        .limit(parallelLimit)
-    })
+        .limit(parallelLimit);
+    });
 
-    const parallelResults = await Promise.all(queryPromises)
-    return parallelResults.flat().slice(0, topK)
+    const parallelResults = await Promise.all(queryPromises);
+    return parallelResults.flat().slice(0, topK);
   }
   // Single query for fewer KBs
   return await db
@@ -277,7 +295,7 @@ export async function handleTagOnlySearch(params: SearchParams): Promise<SearchR
       tag5: embedding.tag5,
       tag6: embedding.tag6,
       tag7: embedding.tag7,
-      distance: sql<number>`0`.as('distance'), // No distance for tag-only searches
+      distance: sql<number>`0`.as("distance"), // No distance for tag-only searches
       knowledgeBaseId: embedding.knowledgeBaseId,
     })
     .from(embedding)
@@ -288,23 +306,27 @@ export async function handleTagOnlySearch(params: SearchParams): Promise<SearchR
         ...getTagFilters(filters, embedding)
       )
     )
-    .limit(topK)
+    .limit(topK);
 }
 
-export async function handleVectorOnlySearch(params: SearchParams): Promise<SearchResult[]> {
-  const { knowledgeBaseIds, topK, queryVector, distanceThreshold } = params
+export async function handleVectorOnlySearch(
+  params: SearchParams
+): Promise<SearchResult[]> {
+  const { knowledgeBaseIds, topK, queryVector, distanceThreshold } = params;
 
   if (!queryVector || !distanceThreshold) {
-    throw new Error('Query vector and distance threshold are required for vector-only search')
+    throw new Error(
+      "Query vector and distance threshold are required for vector-only search"
+    );
   }
 
-  logger.debug(`[handleVectorOnlySearch] Executing vector-only search`)
+  logger.debug(`[handleVectorOnlySearch] Executing vector-only search`);
 
-  const strategy = getQueryStrategy(knowledgeBaseIds.length, topK)
+  const strategy = getQueryStrategy(knowledgeBaseIds.length, topK);
 
   if (strategy.useParallel) {
     // Parallel approach for many KBs
-    const parallelLimit = Math.ceil(topK / knowledgeBaseIds.length) + 5
+    const parallelLimit = Math.ceil(topK / knowledgeBaseIds.length) + 5;
 
     const queryPromises = knowledgeBaseIds.map(async (kbId) => {
       return await db
@@ -320,7 +342,10 @@ export async function handleVectorOnlySearch(params: SearchParams): Promise<Sear
           tag5: embedding.tag5,
           tag6: embedding.tag6,
           tag7: embedding.tag7,
-          distance: sql<number>`${embedding.embedding} <=> ${queryVector}::vector`.as('distance'),
+          distance:
+            sql<number>`${embedding.embedding} <=> ${queryVector}::vector`.as(
+              "distance"
+            ),
           knowledgeBaseId: embedding.knowledgeBaseId,
         })
         .from(embedding)
@@ -332,12 +357,12 @@ export async function handleVectorOnlySearch(params: SearchParams): Promise<Sear
           )
         )
         .orderBy(sql`${embedding.embedding} <=> ${queryVector}::vector`)
-        .limit(parallelLimit)
-    })
+        .limit(parallelLimit);
+    });
 
-    const parallelResults = await Promise.all(queryPromises)
-    const allResults = parallelResults.flat()
-    return allResults.sort((a, b) => a.distance - b.distance).slice(0, topK)
+    const parallelResults = await Promise.all(queryPromises);
+    const allResults = parallelResults.flat();
+    return allResults.sort((a, b) => a.distance - b.distance).slice(0, topK);
   }
   // Single query for fewer KBs
   return await db
@@ -353,7 +378,10 @@ export async function handleVectorOnlySearch(params: SearchParams): Promise<Sear
       tag5: embedding.tag5,
       tag6: embedding.tag6,
       tag7: embedding.tag7,
-      distance: sql<number>`${embedding.embedding} <=> ${queryVector}::vector`.as('distance'),
+      distance:
+        sql<number>`${embedding.embedding} <=> ${queryVector}::vector`.as(
+          "distance"
+        ),
       knowledgeBaseId: embedding.knowledgeBaseId,
     })
     .from(embedding)
@@ -365,32 +393,42 @@ export async function handleVectorOnlySearch(params: SearchParams): Promise<Sear
       )
     )
     .orderBy(sql`${embedding.embedding} <=> ${queryVector}::vector`)
-    .limit(topK)
+    .limit(topK);
 }
 
-export async function handleTagAndVectorSearch(params: SearchParams): Promise<SearchResult[]> {
-  const { knowledgeBaseIds, topK, filters, queryVector, distanceThreshold } = params
+export async function handleTagAndVectorSearch(
+  params: SearchParams
+): Promise<SearchResult[]> {
+  const { knowledgeBaseIds, topK, filters, queryVector, distanceThreshold } =
+    params;
 
   if (!filters || Object.keys(filters).length === 0) {
-    throw new Error('Tag filters are required for tag and vector search')
+    throw new Error("Tag filters are required for tag and vector search");
   }
   if (!queryVector || !distanceThreshold) {
-    throw new Error('Query vector and distance threshold are required for tag and vector search')
+    throw new Error(
+      "Query vector and distance threshold are required for tag and vector search"
+    );
   }
 
-  logger.debug(`[handleTagAndVectorSearch] Executing tag + vector search with filters:`, filters)
+  logger.debug(
+    `[handleTagAndVectorSearch] Executing tag + vector search with filters:`,
+    filters
+  );
 
   // Step 1: Filter by tags first
-  const tagFilteredIds = await executeTagFilterQuery(knowledgeBaseIds, filters)
+  const tagFilteredIds = await executeTagFilterQuery(knowledgeBaseIds, filters);
 
   if (tagFilteredIds.length === 0) {
-    logger.debug(`[handleTagAndVectorSearch] No results found after tag filtering`)
-    return []
+    logger.debug(
+      `[handleTagAndVectorSearch] No results found after tag filtering`
+    );
+    return [];
   }
 
   logger.debug(
     `[handleTagAndVectorSearch] Found ${tagFilteredIds.length} results after tag filtering`
-  )
+  );
 
   // Step 2: Perform vector search only on tag-filtered results
   return await executeVectorSearchOnIds(
@@ -398,5 +436,5 @@ export async function handleTagAndVectorSearch(params: SearchParams): Promise<Se
     queryVector,
     topK,
     distanceThreshold
-  )
+  );
 }
