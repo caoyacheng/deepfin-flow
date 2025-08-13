@@ -1,100 +1,127 @@
-import { Analytics } from '@vercel/analytics/next'
-import { SpeedInsights } from '@vercel/speed-insights/next'
-import type { Metadata, Viewport } from 'next'
-import { PublicEnvScript } from 'next-runtime-env'
-import { BrandedLayout } from '@/components/branded-layout'
-import { generateBrandedMetadata, generateStructuredData } from '@/lib/branding/metadata'
-import { env } from '@/lib/env'
-import { isHosted } from '@/lib/environment'
-import { createLogger } from '@/lib/logs/console/logger'
-import { getAssetUrl } from '@/lib/utils'
-import { TelemetryConsentDialog } from '@/app/telemetry-consent-dialog'
-import '@/app/globals.css'
+import "@/app/globals.css";
+import { TelemetryConsentDialog } from "@/app/telemetry-consent-dialog";
+import { ZoomPrevention } from "@/app/zoom-prevention";
+import { BrandedLayout } from "@/components/branded-layout";
+import {
+  generateBrandedMetadata,
+  generateStructuredData,
+} from "@/lib/branding/metadata";
+import { env } from "@/lib/env";
+import { isHosted } from "@/lib/environment";
+import { createLogger } from "@/lib/logs/console/logger";
+import { getAssetUrl } from "@/lib/utils";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import type { Metadata, Viewport } from "next";
+import { PublicEnvScript } from "next-runtime-env";
 
-import { ZoomPrevention } from '@/app/zoom-prevention'
-
-const logger = createLogger('RootLayout')
+const logger = createLogger("RootLayout");
 
 const BROWSER_EXTENSION_ATTRIBUTES = [
-  'data-new-gr-c-s-check-loaded',
-  'data-gr-ext-installed',
-  'data-gr-ext-disabled',
-  'data-grammarly',
-  'data-fgm',
-  'data-lt-installed',
-]
+  "data-new-gr-c-s-check-loaded",
+  "data-gr-ext-installed",
+  "data-gr-ext-disabled",
+  "data-grammarly",
+  "data-fgm",
+  "data-lt-installed",
+];
 
-if (typeof window !== 'undefined') {
-  const originalError = console.error
+if (typeof window !== "undefined") {
+  const originalError = console.error;
   console.error = (...args) => {
-    if (args[0].includes('Hydration')) {
+    if (args[0].includes("Hydration")) {
       const isExtensionError = BROWSER_EXTENSION_ATTRIBUTES.some((attr) =>
-        args.some((arg) => typeof arg === 'string' && arg.includes(attr))
-      )
+        args.some((arg) => typeof arg === "string" && arg.includes(attr))
+      );
 
       if (!isExtensionError) {
-        logger.error('Hydration Error', {
+        logger.error("Hydration Error", {
           details: args,
           componentStack: args.find(
-            (arg) => typeof arg === 'string' && arg.includes('component stack')
+            (arg) => typeof arg === "string" && arg.includes("component stack")
           ),
-        })
+        });
       }
     }
-    originalError.apply(console, args)
-  }
+    originalError.apply(console, args);
+  };
 }
 
 export const viewport: Viewport = {
-  themeColor: '#ffffff',
-  width: 'device-width',
+  themeColor: "#ffffff",
+  width: "device-width",
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-}
+};
 
 // Generate dynamic metadata based on brand configuration
-export const metadata: Metadata = generateBrandedMetadata()
+export const metadata: Metadata = generateBrandedMetadata();
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const structuredData = generateStructuredData()
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const structuredData = generateStructuredData();
 
   return (
-    <html lang='en' suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Structured Data for SEO */}
         <script
-          type='application/ld+json'
+          type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(structuredData),
           }}
         />
 
         {/* Meta tags for better SEO */}
-        <meta name='theme-color' content='#ffffff' />
-        <meta name='color-scheme' content='light' />
-        <meta name='format-detection' content='telephone=no' />
-        <meta httpEquiv='x-ua-compatible' content='ie=edge' />
+        <meta name="theme-color" content="#ffffff" />
+        <meta name="color-scheme" content="light" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta httpEquiv="x-ua-compatible" content="ie=edge" />
 
         {/* Additional Open Graph tags */}
-        <meta property='og:image:width' content='1200' />
-        <meta property='og:image:height' content='630' />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta
-          property='og:image:alt'
-          content='Sim - AI Agent Builder with Visual Canvas Interface'
+          property="og:image:alt"
+          content="Sim - AI Agent Builder with Visual Canvas Interface"
         />
-        <meta property='og:site_name' content='Sim' />
-        <meta property='og:locale' content='en_US' />
+        <meta property="og:site_name" content="Sim" />
+        <meta property="og:locale" content="en_US" />
 
         {/* Twitter Card tags */}
-        <meta name='twitter:image:width' content='1200' />
-        <meta name='twitter:image:height' content='675' />
-        <meta name='twitter:image:alt' content='Sim - AI Agent Builder' />
-        <meta name='twitter:url' content='https://sim.ai' />
-        <meta name='twitter:domain' content='sim.ai' />
+        <meta name="twitter:image:width" content="1200" />
+        <meta name="twitter:image:height" content="675" />
+        <meta name="twitter:image:alt" content="Sim - AI Agent Builder" />
+        <meta name="twitter:url" content="https://sim.ai" />
+        <meta name="twitter:domain" content="sim.ai" />
 
         {/* Additional image sources */}
-        <link rel='image_src' href={getAssetUrl('social/facebook.png')} />
+        <link rel="image_src" href={getAssetUrl("social/facebook.png")} />
+
+        {/* Favicon */}
+        <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico" />
+        <link
+          rel="shortcut icon"
+          type="image/x-icon"
+          href="/favicon/favicon.ico"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon/favicon-16x16.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon/favicon-32x32.png"
+        />
+        <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png" />
 
         <PublicEnvScript />
 
@@ -121,5 +148,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </BrandedLayout>
       </body>
     </html>
-  )
+  );
 }

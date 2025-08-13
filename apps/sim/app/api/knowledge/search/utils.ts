@@ -52,26 +52,87 @@ export async function generateSearchEmbedding(
   try {
     const embedding = await retryWithExponentialBackoff(
       async () => {
+        // Clean and validate the input text
+        let cleanedQuery = query;
+        if (typeof cleanedQuery !== "string") {
+          cleanedQuery = String(cleanedQuery);
+        }
+
+        // Clean the text: remove null bytes, normalize whitespace, limit length
+        cleanedQuery = cleanedQuery
+          .replace(/\0/g, "") // Remove null bytes
+          .replace(/\r\n/g, "\n") // Normalize line endings
+          .replace(/\r/g, "\n") // Normalize line endings
+          .trim();
+
+        // Limit text length to 8000 characters (Qwen API limit)
+        if (cleanedQuery.length > 8000) {
+          logger.warn(
+            `Query too long (${cleanedQuery.length} chars), truncating to 8000 chars`
+          );
+          cleanedQuery = cleanedQuery.substring(0, 8000) + "...";
+        }
+
+        // Prepare request body and log it for debugging
+        const requestBody = {
+          model: "text-embedding-v4",
+          input: [cleanedQuery],
+        };
+
+        // Try with a simple test string first to debug the issue
+        const testRequestBody = {
+          model: "text-embedding-v4",
+          input: ["test"],
+        };
+
+        const requestBodyJson = JSON.stringify(requestBody);
+        const testRequestBodyJson = JSON.stringify(testRequestBody);
+
+        logger.debug(
+          `[generateSearchEmbedding] Original request body: ${requestBodyJson}`
+        );
+        logger.debug(
+          `[generateSearchEmbedding] Test request body: ${testRequestBodyJson}`
+        );
+        logger.debug(
+          `[generateSearchEmbedding] Input type: ${typeof cleanedQuery}, length: ${cleanedQuery.length}`
+        );
+        logger.debug(
+          `[generateSearchEmbedding] Input content preview: "${cleanedQuery.substring(0, 100)}..."`
+        );
+
+        // Validate JSON serialization
+        try {
+          JSON.parse(requestBodyJson);
+          JSON.parse(testRequestBodyJson);
+          logger.debug(`[generateSearchEmbedding] JSON validation successful`);
+        } catch (jsonError) {
+          logger.error(
+            `[generateSearchEmbedding] JSON validation failed:`,
+            jsonError
+          );
+          throw new Error(
+            `Failed to serialize request body: ${jsonError instanceof Error ? jsonError.message : "Unknown error"}`
+          );
+        }
+
         const response = await fetch(
-          "https://dashscope.aliyuncs.com/api/v1/services/embeddings/text-embedding-v4/text-embedding",
+          "https://dashscope.aliyuncs.com/compatible-mode/v1/embeddings",
           {
             method: "POST",
             headers: {
               Authorization: `Bearer ${dashscopeApiKey}`,
               "Content-Type": "application/json",
+              "X-DashScope-SSE": "disable",
             },
-            body: JSON.stringify({
-              input: query,
-              model: "text-embedding-v4",
-              encoding_format: "float",
-            }),
+            body: requestBodyJson,
           }
         );
 
         if (!response.ok) {
           const errorText = await response.text();
           const error = new APIError(
-            `OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`,
+            `DashScope API error: ${response.status} ${response.statusText} - ${errorText}`,
             response.status
           );
           throw error;
@@ -79,11 +140,30 @@ export async function generateSearchEmbedding(
 
         const data = await response.json();
 
-        if (!data.data || !Array.isArray(data.data) || data.data.length === 0) {
-          throw new Error("Invalid response format from OpenAI embeddings API");
+        // Handle both standard and compatible mode response formats
+        let embedding;
+        if (
+          data.output &&
+          data.output.embeddings &&
+          Array.isArray(data.output.embeddings) &&
+          data.output.embeddings.length > 0
+        ) {
+          // Standard DashScope format
+          embedding = data.output.embeddings[0].embedding;
+        } else if (
+          data.data &&
+          Array.isArray(data.data) &&
+          data.data.length > 0
+        ) {
+          // Compatible mode format (OpenAI-like)
+          embedding = data.data[0].embedding;
+        } else {
+          throw new Error(
+            "Invalid response format from DashScope embeddings API"
+          );
         }
 
-        return data.data[0].embedding;
+        return embedding;
       },
       {
         maxRetries: 5,

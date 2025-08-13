@@ -5,6 +5,7 @@
  *
  * @vitest-environment node
  */
+
 import {
   createMockRequest,
   mockConsoleLogger,
@@ -199,7 +200,7 @@ describe("Knowledge Search API Route", () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            data: [{ embedding: mockEmbedding }],
+            output: { embeddings: [{ embedding: mockEmbedding }] },
           }),
       });
 
@@ -256,7 +257,7 @@ describe("Knowledge Search API Route", () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            data: [{ embedding: mockEmbedding }],
+            output: { embeddings: [{ embedding: mockEmbedding }] },
           }),
       });
 
@@ -302,7 +303,7 @@ describe("Knowledge Search API Route", () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            data: [{ embedding: mockEmbedding }],
+            output: { embeddings: [{ embedding: mockEmbedding }] },
           }),
       });
 
@@ -440,7 +441,7 @@ describe("Knowledge Search API Route", () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            data: [{ embedding: mockEmbedding }],
+            output: { embeddings: [{ embedding: mockEmbedding }] },
           }),
       });
 
@@ -453,13 +454,13 @@ describe("Knowledge Search API Route", () => {
       expect(data.data.topK).toBe(10); // Default value
     });
 
-    it.concurrent("should handle OpenAI API errors", async () => {
+    it.concurrent("should handle DashScope API errors", async () => {
       mockGetUserId.mockResolvedValue("user-123");
       mockDbChain.limit.mockResolvedValueOnce(mockKnowledgeBases);
 
       // Mock generateSearchEmbedding to throw an error
       mockGenerateSearchEmbedding.mockRejectedValueOnce(
-        new Error("OpenAI API error: 401 Unauthorized - Invalid API key")
+        new Error("DashScope API error: 401 Unauthorized - Invalid API key")
       );
 
       const req = createMockRequest("POST", validSearchData);
@@ -471,13 +472,13 @@ describe("Knowledge Search API Route", () => {
       expect(data.error).toBe("Failed to perform vector search");
     });
 
-    it.concurrent("should handle missing OpenAI API key", async () => {
+    it.concurrent("should handle missing DashScope API key", async () => {
       mockGetUserId.mockResolvedValue("user-123");
       mockDbChain.limit.mockResolvedValueOnce(mockKnowledgeBases);
 
       // Mock generateSearchEmbedding to throw missing API key error
       mockGenerateSearchEmbedding.mockRejectedValueOnce(
-        new Error("OPENAI_API_KEY not configured")
+        new Error("DASHSCOPE_API_KEY not configured")
       );
 
       const req = createMockRequest("POST", validSearchData);
@@ -507,23 +508,26 @@ describe("Knowledge Search API Route", () => {
       expect(data.error).toBe("Failed to perform vector search");
     });
 
-    it.concurrent("should handle invalid OpenAI response format", async () => {
-      mockGetUserId.mockResolvedValue("user-123");
-      mockDbChain.limit.mockResolvedValueOnce(mockKnowledgeBases);
+    it.concurrent(
+      "should handle invalid DashScope response format",
+      async () => {
+        mockGetUserId.mockResolvedValue("user-123");
+        mockDbChain.limit.mockResolvedValueOnce(mockKnowledgeBases);
 
-      // Mock generateSearchEmbedding to throw invalid response format error
-      mockGenerateSearchEmbedding.mockRejectedValueOnce(
-        new Error("Invalid response format from OpenAI embeddings API")
-      );
+        // Mock generateSearchEmbedding to throw invalid response format error
+        mockGenerateSearchEmbedding.mockRejectedValueOnce(
+          new Error("Invalid response format from DashScope embeddings API")
+        );
 
-      const req = createMockRequest("POST", validSearchData);
-      const { POST } = await import("@/app/api/knowledge/search/route");
-      const response = await POST(req);
-      const data = await response.json();
+        const req = createMockRequest("POST", validSearchData);
+        const { POST } = await import("@/app/api/knowledge/search/route");
+        const response = await POST(req);
+        const data = await response.json();
 
-      expect(response.status).toBe(500);
-      expect(data.error).toBe("Failed to perform vector search");
-    });
+        expect(response.status).toBe(500);
+        expect(data.error).toBe("Failed to perform vector search");
+      }
+    );
 
     describe("Cost tracking", () => {
       it.concurrent(
@@ -548,7 +552,7 @@ describe("Knowledge Search API Route", () => {
             ok: true,
             json: () =>
               Promise.resolve({
-                data: [{ embedding: mockEmbedding }],
+                output: { embeddings: [{ embedding: mockEmbedding }] },
               }),
           });
 
@@ -604,7 +608,7 @@ describe("Knowledge Search API Route", () => {
           ok: true,
           json: () =>
             Promise.resolve({
-              data: [{ embedding: mockEmbedding }],
+              output: { embeddings: [{ embedding: mockEmbedding }] },
             }),
         });
 
@@ -676,7 +680,7 @@ describe("Knowledge Search API Route", () => {
           ok: true,
           json: () =>
             Promise.resolve({
-              data: [{ embedding: mockEmbedding }],
+              output: { embeddings: [{ embedding: mockEmbedding }] },
             }),
         });
 
@@ -811,7 +815,7 @@ describe("Knowledge Search API Route", () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            data: [{ embedding: mockEmbedding }],
+            output: { embeddings: [{ embedding: mockEmbedding }] },
           }),
       });
 
@@ -954,7 +958,7 @@ describe("Knowledge Search API Route", () => {
         ok: true,
         json: () =>
           Promise.resolve({
-            data: [{ embedding: mockEmbedding }],
+            output: { embeddings: [{ embedding: mockEmbedding }] },
           }),
       });
 
