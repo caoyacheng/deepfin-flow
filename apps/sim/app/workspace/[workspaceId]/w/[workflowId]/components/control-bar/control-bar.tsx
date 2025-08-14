@@ -715,10 +715,10 @@ export function ControlBar({ hasValidationErrors = false }: ControlBarProps) {
               disabled={isControlDisabled}
             >
               <StepForward className="h-5 w-5" />
-              <span className="sr-only">Step Forward</span>
+              <span className="sr-only">单步执行</span>
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Step Forward</TooltipContent>
+          <TooltipContent>单步执行</TooltipContent>
         </Tooltip>
 
         <Tooltip>

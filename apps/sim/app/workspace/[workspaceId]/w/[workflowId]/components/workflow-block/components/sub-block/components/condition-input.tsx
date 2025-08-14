@@ -1,48 +1,54 @@
-import type { ReactElement } from 'react'
-import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, ChevronUp, Plus, Trash } from 'lucide-react'
-import { highlight, languages } from 'prismjs'
-import 'prismjs/components/prism-javascript'
-import 'prismjs/themes/prism.css'
+import { useSubBlockValue } from "@/app/workspace/[workspaceId]/w/[workflowId]/components/workflow-block/components/sub-block/hooks/use-sub-block-value";
+import { Button } from "@/components/ui/button";
+import {
+  checkEnvVarTrigger,
+  EnvVarDropdown,
+} from "@/components/ui/env-var-dropdown";
+import { checkTagTrigger, TagDropdown } from "@/components/ui/tag-dropdown";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useTagSelection } from "@/hooks/use-tag-selection";
+import { createLogger } from "@/lib/logs/console/logger";
+import { cn } from "@/lib/utils";
+import { useWorkflowStore } from "@/stores/workflows/workflow/store";
+import { ChevronDown, ChevronUp, Plus, Trash } from "lucide-react";
+import { highlight, languages } from "prismjs";
+import "prismjs/components/prism-javascript";
+import "prismjs/themes/prism.css";
+import type { ReactElement } from "react";
+import { useEffect, useRef, useState } from "react";
+import Editor from "react-simple-code-editor";
+import { Handle, Position, useUpdateNodeInternals } from "reactflow";
 
-import Editor from 'react-simple-code-editor'
-import { Handle, Position, useUpdateNodeInternals } from 'reactflow'
-import { Button } from '@/components/ui/button'
-import { checkEnvVarTrigger, EnvVarDropdown } from '@/components/ui/env-var-dropdown'
-import { checkTagTrigger, TagDropdown } from '@/components/ui/tag-dropdown'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { createLogger } from '@/lib/logs/console/logger'
-import { cn } from '@/lib/utils'
-import { useSubBlockValue } from '@/app/workspace/[workspaceId]/w/[workflowId]/components/workflow-block/components/sub-block/hooks/use-sub-block-value'
-import { useTagSelection } from '@/hooks/use-tag-selection'
-import { useWorkflowStore } from '@/stores/workflows/workflow/store'
-
-const logger = createLogger('ConditionInput')
+const logger = createLogger("ConditionInput");
 
 interface ConditionalBlock {
-  id: string
-  title: string
-  value: string
-  showTags: boolean
-  showEnvVars: boolean
-  searchTerm: string
-  cursorPosition: number
-  activeSourceBlockId: string | null
+  id: string;
+  title: string;
+  value: string;
+  showTags: boolean;
+  showEnvVars: boolean;
+  searchTerm: string;
+  cursorPosition: number;
+  activeSourceBlockId: string | null;
 }
 
 interface ConditionInputProps {
-  blockId: string
-  subBlockId: string
-  isConnecting: boolean
-  isPreview?: boolean
-  previewValue?: string | null
-  disabled?: boolean
+  blockId: string;
+  subBlockId: string;
+  isConnecting: boolean;
+  isPreview?: boolean;
+  previewValue?: string | null;
+  disabled?: boolean;
 }
 
 // Generate a stable ID based on the blockId and a suffix
 const generateStableId = (blockId: string, suffix: string): string => {
-  return `${blockId}-${suffix}`
-}
+  return `${blockId}-${suffix}`;
+};
 
 export function ConditionInput({
   blockId,
@@ -52,169 +58,191 @@ export function ConditionInput({
   previewValue,
   disabled = false,
 }: ConditionInputProps) {
-  const [storeValue, setStoreValue] = useSubBlockValue(blockId, subBlockId)
+  const [storeValue, setStoreValue] = useSubBlockValue(blockId, subBlockId);
 
-  const emitTagSelection = useTagSelection(blockId, subBlockId)
+  const emitTagSelection = useTagSelection(blockId, subBlockId);
 
-  const containerRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null);
   const [visualLineHeights, setVisualLineHeights] = useState<{
-    [key: string]: number[]
-  }>({})
-  const updateNodeInternals = useUpdateNodeInternals()
-  const removeEdge = useWorkflowStore((state) => state.removeEdge)
-  const edges = useWorkflowStore((state) => state.edges)
+    [key: string]: number[];
+  }>({});
+  const updateNodeInternals = useUpdateNodeInternals();
+  const removeEdge = useWorkflowStore((state) => state.removeEdge);
+  const edges = useWorkflowStore((state) => state.edges);
 
   // Use a ref to track the previous store value for comparison
-  const prevStoreValueRef = useRef<string | null>(null)
+  const prevStoreValueRef = useRef<string | null>(null);
   // Use a ref to track if we're currently syncing from store to prevent loops
-  const isSyncingFromStoreRef = useRef(false)
+  const isSyncingFromStoreRef = useRef(false);
   // Use a ref to track if we've already initialized from store
-  const hasInitializedRef = useRef(false)
+  const hasInitializedRef = useRef(false);
   // Track previous blockId to detect workflow changes
-  const previousBlockIdRef = useRef<string>(blockId)
+  const previousBlockIdRef = useRef<string>(blockId);
 
   // Create default blocks with stable IDs
   const createDefaultBlocks = (): ConditionalBlock[] => [
     {
-      id: generateStableId(blockId, 'if'),
-      title: 'if',
-      value: '',
+      id: generateStableId(blockId, "if"),
+      title: "if",
+      value: "",
       showTags: false,
       showEnvVars: false,
-      searchTerm: '',
+      searchTerm: "",
       cursorPosition: 0,
       activeSourceBlockId: null,
     },
     {
-      id: generateStableId(blockId, 'else'),
-      title: 'else',
-      value: '',
+      id: generateStableId(blockId, "else"),
+      title: "else",
+      value: "",
       showTags: false,
       showEnvVars: false,
-      searchTerm: '',
+      searchTerm: "",
       cursorPosition: 0,
       activeSourceBlockId: null,
     },
-  ]
+  ];
 
   // Initialize with a loading state instead of default blocks
-  const [conditionalBlocks, setConditionalBlocks] = useState<ConditionalBlock[]>([])
-  const [isReady, setIsReady] = useState(false)
+  const [conditionalBlocks, setConditionalBlocks] = useState<
+    ConditionalBlock[]
+  >([]);
+  const [isReady, setIsReady] = useState(false);
 
   // Reset initialization state when blockId changes (workflow navigation)
   useEffect(() => {
     if (blockId !== previousBlockIdRef.current) {
       // Reset refs and state for new workflow/block
-      hasInitializedRef.current = false
-      isSyncingFromStoreRef.current = false
-      prevStoreValueRef.current = null
-      previousBlockIdRef.current = blockId
-      setIsReady(false)
-      setConditionalBlocks([])
+      hasInitializedRef.current = false;
+      isSyncingFromStoreRef.current = false;
+      prevStoreValueRef.current = null;
+      previousBlockIdRef.current = blockId;
+      setIsReady(false);
+      setConditionalBlocks([]);
     }
-  }, [blockId])
+  }, [blockId]);
 
   // Safely parse JSON with fallback
-  const safeParseJSON = (jsonString: string | null): ConditionalBlock[] | null => {
-    if (!jsonString) return null
+  const safeParseJSON = (
+    jsonString: string | null
+  ): ConditionalBlock[] | null => {
+    if (!jsonString) return null;
     try {
-      const parsed = JSON.parse(jsonString)
-      if (!Array.isArray(parsed)) return null
+      const parsed = JSON.parse(jsonString);
+      if (!Array.isArray(parsed)) return null;
 
       // Validate that the parsed data has the expected structure
-      if (parsed.length === 0 || !('id' in parsed[0]) || !('title' in parsed[0])) {
-        return null
+      if (
+        parsed.length === 0 ||
+        !("id" in parsed[0]) ||
+        !("title" in parsed[0])
+      ) {
+        return null;
       }
 
-      return parsed
+      return parsed;
     } catch (error) {
-      logger.error('Failed to parse JSON:', { error, jsonString })
-      return null
+      logger.error("Failed to parse JSON:", { error, jsonString });
+      return null;
     }
-  }
+  };
 
   // Sync store value with conditional blocks when storeValue changes
   useEffect(() => {
     // Skip if syncing is already in progress
-    if (isSyncingFromStoreRef.current) return
+    if (isSyncingFromStoreRef.current) return;
 
     // Use preview value when in preview mode, otherwise use store value
-    const effectiveValue = isPreview ? previewValue : storeValue
+    const effectiveValue = isPreview ? previewValue : storeValue;
     // Convert effectiveValue to string if it's not null
-    const effectiveValueStr = effectiveValue !== null ? effectiveValue?.toString() : null
+    const effectiveValueStr =
+      effectiveValue !== null ? effectiveValue?.toString() : null;
 
     // Set that we're syncing from store to prevent loops
-    isSyncingFromStoreRef.current = true
+    isSyncingFromStoreRef.current = true;
 
     try {
       // If effective value is null, and we've already initialized, keep current state
       if (effectiveValueStr === null) {
         if (hasInitializedRef.current) {
           // We already have blocks, just mark as ready if not already
-          if (!isReady) setIsReady(true)
-          isSyncingFromStoreRef.current = false
-          return
+          if (!isReady) setIsReady(true);
+          isSyncingFromStoreRef.current = false;
+          return;
         }
 
         // If we haven't initialized yet, set default blocks
-        setConditionalBlocks(createDefaultBlocks())
-        hasInitializedRef.current = true
-        setIsReady(true)
-        isSyncingFromStoreRef.current = false
-        return
+        setConditionalBlocks(createDefaultBlocks());
+        hasInitializedRef.current = true;
+        setIsReady(true);
+        isSyncingFromStoreRef.current = false;
+        return;
       }
 
       // Skip if the effective value hasn't changed and we're already initialized
-      if (effectiveValueStr === prevStoreValueRef.current && hasInitializedRef.current) {
-        if (!isReady) setIsReady(true)
-        isSyncingFromStoreRef.current = false
-        return
+      if (
+        effectiveValueStr === prevStoreValueRef.current &&
+        hasInitializedRef.current
+      ) {
+        if (!isReady) setIsReady(true);
+        isSyncingFromStoreRef.current = false;
+        return;
       }
 
       // Update the previous store value ref
-      prevStoreValueRef.current = effectiveValueStr
+      prevStoreValueRef.current = effectiveValueStr;
 
       // Parse the effective value
-      const parsedBlocks = safeParseJSON(effectiveValueStr)
+      const parsedBlocks = safeParseJSON(effectiveValueStr);
 
       if (parsedBlocks) {
         // Use the parsed blocks, but ensure titles are correct based on position
         const blocksWithCorrectTitles = parsedBlocks.map((block, index) => ({
           ...block,
-          title: index === 0 ? 'if' : index === parsedBlocks.length - 1 ? 'else' : 'else if',
-        }))
+          title:
+            index === 0
+              ? "if"
+              : index === parsedBlocks.length - 1
+                ? "else"
+                : "else if",
+        }));
 
-        setConditionalBlocks(blocksWithCorrectTitles)
-        hasInitializedRef.current = true
-        if (!isReady) setIsReady(true)
+        setConditionalBlocks(blocksWithCorrectTitles);
+        hasInitializedRef.current = true;
+        if (!isReady) setIsReady(true);
       } else if (!hasInitializedRef.current) {
         // Only set default blocks if we haven't initialized yet
-        setConditionalBlocks(createDefaultBlocks())
-        hasInitializedRef.current = true
-        setIsReady(true)
+        setConditionalBlocks(createDefaultBlocks());
+        hasInitializedRef.current = true;
+        setIsReady(true);
       }
     } finally {
       // Reset the syncing flag after a short delay
       setTimeout(() => {
-        isSyncingFromStoreRef.current = false
-      }, 0)
+        isSyncingFromStoreRef.current = false;
+      }, 0);
     }
-  }, [storeValue, previewValue, isPreview, blockId, isReady])
+  }, [storeValue, previewValue, isPreview, blockId, isReady]);
 
   // Update store whenever conditional blocks change
   useEffect(() => {
     // Skip if we're currently syncing from store to prevent loops
     // or if we're not ready yet (still initializing) or in preview mode
-    if (isSyncingFromStoreRef.current || !isReady || conditionalBlocks.length === 0 || isPreview)
-      return
+    if (
+      isSyncingFromStoreRef.current ||
+      !isReady ||
+      conditionalBlocks.length === 0 ||
+      isPreview
+    )
+      return;
 
-    const newValue = JSON.stringify(conditionalBlocks)
+    const newValue = JSON.stringify(conditionalBlocks);
 
     // Only update if the value has actually changed
     if (newValue !== prevStoreValueRef.current) {
-      prevStoreValueRef.current = newValue
-      setStoreValue(newValue)
-      updateNodeInternals(`${blockId}-${subBlockId}`)
+      prevStoreValueRef.current = newValue;
+      setStoreValue(newValue);
+      updateNodeInternals(`${blockId}-${subBlockId}`);
     }
   }, [
     conditionalBlocks,
@@ -224,33 +252,33 @@ export function ConditionInput({
     updateNodeInternals,
     isReady,
     isPreview,
-  ])
+  ]);
 
   // Cleanup when component unmounts
   useEffect(() => {
     return () => {
-      hasInitializedRef.current = false
-      prevStoreValueRef.current = null
-      isSyncingFromStoreRef.current = false
-    }
-  }, [])
+      hasInitializedRef.current = false;
+      prevStoreValueRef.current = null;
+      isSyncingFromStoreRef.current = false;
+    };
+  }, []);
 
   // Update the line counting logic to be block-specific
   useEffect(() => {
-    if (!containerRef.current || conditionalBlocks.length === 0) return
+    if (!containerRef.current || conditionalBlocks.length === 0) return;
 
     const calculateVisualLines = () => {
-      const preElement = containerRef.current?.querySelector('pre')
-      if (!preElement) return
+      const preElement = containerRef.current?.querySelector("pre");
+      if (!preElement) return;
 
-      const newVisualLineHeights: { [key: string]: number[] } = {}
+      const newVisualLineHeights: { [key: string]: number[] } = {};
 
       conditionalBlocks.forEach((block) => {
-        const lines = block.value.split('\n')
-        const blockVisualHeights: number[] = []
+        const lines = block.value.split("\n");
+        const blockVisualHeights: number[] = [];
 
         // Create a hidden container with the same width as the editor
-        const container = document.createElement('div')
+        const container = document.createElement("div");
         container.style.cssText = `
           position: absolute;
           visibility: hidden;
@@ -260,119 +288,122 @@ export function ConditionInput({
           padding: 12px;
           white-space: pre-wrap;
           word-break: break-word;
-        `
-        document.body.appendChild(container)
+        `;
+        document.body.appendChild(container);
 
         // Process each line
         lines.forEach((line) => {
-          const lineDiv = document.createElement('div')
+          const lineDiv = document.createElement("div");
 
-          if (line.includes('<') && line.includes('>')) {
-            const parts = line.split(/(<[^>]+>)/g)
+          if (line.includes("<") && line.includes(">")) {
+            const parts = line.split(/(<[^>]+>)/g);
             parts.forEach((part) => {
-              const span = document.createElement('span')
-              span.textContent = part
-              if (part.startsWith('<') && part.endsWith('>')) {
-                span.style.color = 'rgb(153, 0, 85)'
+              const span = document.createElement("span");
+              span.textContent = part;
+              if (part.startsWith("<") && part.endsWith(">")) {
+                span.style.color = "rgb(153, 0, 85)";
               }
-              lineDiv.appendChild(span)
-            })
+              lineDiv.appendChild(span);
+            });
           } else {
-            lineDiv.textContent = line || ' '
+            lineDiv.textContent = line || " ";
           }
 
-          container.appendChild(lineDiv)
+          container.appendChild(lineDiv);
 
-          const actualHeight = lineDiv.getBoundingClientRect().height
-          const lineUnits = Math.ceil(actualHeight / 21)
-          blockVisualHeights.push(lineUnits)
+          const actualHeight = lineDiv.getBoundingClientRect().height;
+          const lineUnits = Math.ceil(actualHeight / 21);
+          blockVisualHeights.push(lineUnits);
 
-          container.removeChild(lineDiv)
-        })
+          container.removeChild(lineDiv);
+        });
 
-        document.body.removeChild(container)
-        newVisualLineHeights[block.id] = blockVisualHeights
-      })
+        document.body.removeChild(container);
+        newVisualLineHeights[block.id] = blockVisualHeights;
+      });
 
-      setVisualLineHeights(newVisualLineHeights)
-    }
+      setVisualLineHeights(newVisualLineHeights);
+    };
 
-    calculateVisualLines()
+    calculateVisualLines();
 
-    const resizeObserver = new ResizeObserver(calculateVisualLines)
-    resizeObserver.observe(containerRef.current)
+    const resizeObserver = new ResizeObserver(calculateVisualLines);
+    resizeObserver.observe(containerRef.current);
 
-    return () => resizeObserver.disconnect()
-  }, [conditionalBlocks])
+    return () => resizeObserver.disconnect();
+  }, [conditionalBlocks]);
 
   // Modify the line numbers rendering to be block-specific
   const renderLineNumbers = (blockId: string) => {
-    const numbers: ReactElement[] = []
-    let lineNumber = 1
-    const blockHeights = visualLineHeights[blockId] || []
+    const numbers: ReactElement[] = [];
+    let lineNumber = 1;
+    const blockHeights = visualLineHeights[blockId] || [];
 
     blockHeights.forEach((height) => {
       for (let i = 0; i < height; i++) {
         numbers.push(
           <div
             key={`${blockId}-${lineNumber}-${i}`}
-            className={cn('text-muted-foreground text-xs leading-[21px]', i > 0 && 'invisible')}
+            className={cn(
+              "text-muted-foreground text-xs leading-[21px]",
+              i > 0 && "invisible"
+            )}
           >
             {lineNumber}
           </div>
-        )
+        );
       }
-      lineNumber++
-    })
+      lineNumber++;
+    });
 
-    return numbers
-  }
+    return numbers;
+  };
 
   // Handle drops from connection blocks - updated for individual blocks
   const handleDrop = (blockId: string, e: React.DragEvent) => {
-    if (isPreview || disabled) return
-    e.preventDefault()
+    if (isPreview || disabled) return;
+    e.preventDefault();
     try {
-      const data = JSON.parse(e.dataTransfer.getData('application/json'))
-      if (data.type !== 'connectionBlock') return
+      const data = JSON.parse(e.dataTransfer.getData("application/json"));
+      if (data.type !== "connectionBlock") return;
 
       const textarea: any = containerRef.current?.querySelector(
         `[data-block-id="${blockId}"] textarea`
-      )
-      const dropPosition = textarea?.selectionStart ?? 0
+      );
+      const dropPosition = textarea?.selectionStart ?? 0;
 
       setConditionalBlocks((blocks) =>
         blocks.map((block) => {
           if (block.id === blockId) {
-            const newValue = `${block.value.slice(0, dropPosition)}<${block.value.slice(dropPosition)}`
+            const newValue = `${block.value.slice(0, dropPosition)}<${block.value.slice(dropPosition)}`;
             return {
               ...block,
               value: newValue,
               showTags: true,
               cursorPosition: dropPosition + 1,
               activeSourceBlockId: data.connectionData?.sourceBlockId || null,
-            }
+            };
           }
-          return block
+          return block;
         })
-      )
+      );
 
       // Set cursor position after state updates
       setTimeout(() => {
         if (textarea) {
-          textarea.selectionStart = dropPosition + 1
-          textarea.selectionEnd = dropPosition + 1
-          textarea.focus()
+          textarea.selectionStart = dropPosition + 1;
+          textarea.selectionEnd = dropPosition + 1;
+          textarea.focus();
         }
-      }, 0)
+      }, 0);
     } catch (error) {
-      logger.error('Failed to parse drop data:', { error })
+      logger.error("Failed to parse drop data:", { error });
     }
-  }
+  };
 
   // Handle tag selection - updated for individual blocks
   const handleTagSelect = (blockId: string, newValue: string) => {
-    if (isPreview || disabled) return
+    if (isPreview || disabled) return;
     setConditionalBlocks((blocks) =>
       blocks.map((block) =>
         block.id === blockId
@@ -384,12 +415,12 @@ export function ConditionInput({
             }
           : block
       )
-    )
-  }
+    );
+  };
 
   // Handle environment variable selection - updated for individual blocks
   const handleEnvVarSelect = (blockId: string, newValue: string) => {
-    if (isPreview || disabled) return
+    if (isPreview || disabled) return;
     setConditionalBlocks((blocks) =>
       blocks.map((block) =>
         block.id === blockId
@@ -397,15 +428,15 @@ export function ConditionInput({
               ...block,
               value: newValue,
               showEnvVars: false,
-              searchTerm: '',
+              searchTerm: "",
             }
           : block
       )
-    )
-  }
+    );
+  };
 
   const handleTagSelectImmediate = (blockId: string, newValue: string) => {
-    if (isPreview || disabled) return
+    if (isPreview || disabled) return;
 
     setConditionalBlocks((blocks) =>
       blocks.map((block) =>
@@ -418,7 +449,7 @@ export function ConditionInput({
             }
           : block
       )
-    )
+    );
 
     const updatedBlocks = conditionalBlocks.map((block) =>
       block.id === blockId
@@ -429,12 +460,12 @@ export function ConditionInput({
             activeSourceBlockId: null,
           }
         : block
-    )
-    emitTagSelection(JSON.stringify(updatedBlocks))
-  }
+    );
+    emitTagSelection(JSON.stringify(updatedBlocks));
+  };
 
   const handleEnvVarSelectImmediate = (blockId: string, newValue: string) => {
-    if (isPreview || disabled) return
+    if (isPreview || disabled) return;
 
     setConditionalBlocks((blocks) =>
       blocks.map((block) =>
@@ -443,11 +474,11 @@ export function ConditionInput({
               ...block,
               value: newValue,
               showEnvVars: false,
-              searchTerm: '',
+              searchTerm: "",
             }
           : block
       )
-    )
+    );
 
     const updatedBlocks = conditionalBlocks.map((block) =>
       block.id === blockId
@@ -455,96 +486,105 @@ export function ConditionInput({
             ...block,
             value: newValue,
             showEnvVars: false,
-            searchTerm: '',
+            searchTerm: "",
           }
         : block
-    )
-    emitTagSelection(JSON.stringify(updatedBlocks))
-  }
+    );
+    emitTagSelection(JSON.stringify(updatedBlocks));
+  };
 
   // Update block titles based on position
-  const updateBlockTitles = (blocks: ConditionalBlock[]): ConditionalBlock[] => {
+  const updateBlockTitles = (
+    blocks: ConditionalBlock[]
+  ): ConditionalBlock[] => {
     return blocks.map((block, index) => ({
       ...block,
-      title: index === 0 ? 'if' : index === blocks.length - 1 ? 'else' : 'else if',
-    }))
-  }
+      title:
+        index === 0 ? "if" : index === blocks.length - 1 ? "else" : "else if",
+    }));
+  };
 
   // Update these functions to use updateBlockTitles and stable IDs
   const addBlock = (afterId: string) => {
-    if (isPreview || disabled) return
+    if (isPreview || disabled) return;
 
-    const blockIndex = conditionalBlocks.findIndex((block) => block.id === afterId)
+    const blockIndex = conditionalBlocks.findIndex(
+      (block) => block.id === afterId
+    );
 
     // Generate a stable ID using the blockId and a timestamp
-    const newBlockId = generateStableId(blockId, `else-if-${Date.now()}`)
+    const newBlockId = generateStableId(blockId, `else-if-${Date.now()}`);
 
     const newBlock: ConditionalBlock = {
       id: newBlockId,
-      title: '', // Will be set by updateBlockTitles
-      value: '',
+      title: "", // Will be set by updateBlockTitles
+      value: "",
       showTags: false,
       showEnvVars: false,
-      searchTerm: '',
+      searchTerm: "",
       cursorPosition: 0,
       activeSourceBlockId: null,
-    }
+    };
 
-    const newBlocks = [...conditionalBlocks]
-    newBlocks.splice(blockIndex + 1, 0, newBlock)
-    setConditionalBlocks(updateBlockTitles(newBlocks))
+    const newBlocks = [...conditionalBlocks];
+    newBlocks.splice(blockIndex + 1, 0, newBlock);
+    setConditionalBlocks(updateBlockTitles(newBlocks));
 
     // Focus the new block's editor after a short delay
     setTimeout(() => {
       const textarea: any = containerRef.current?.querySelector(
         `[data-block-id="${newBlock.id}"] textarea`
-      )
+      );
       if (textarea) {
-        textarea.focus()
+        textarea.focus();
       }
-    }, 0)
-  }
+    }, 0);
+  };
 
   const removeBlock = (id: string) => {
-    if (isPreview || disabled || conditionalBlocks.length <= 2) return
+    if (isPreview || disabled || conditionalBlocks.length <= 2) return;
 
     // Remove any associated edges before removing the block
     edges.forEach((edge) => {
       if (edge.sourceHandle?.startsWith(`condition-${id}`)) {
-        removeEdge(edge.id)
+        removeEdge(edge.id);
       }
-    })
+    });
 
-    if (conditionalBlocks.length === 1) return
-    setConditionalBlocks((blocks) => updateBlockTitles(blocks.filter((block) => block.id !== id)))
-  }
+    if (conditionalBlocks.length === 1) return;
+    setConditionalBlocks((blocks) =>
+      updateBlockTitles(blocks.filter((block) => block.id !== id))
+    );
+  };
 
-  const moveBlock = (id: string, direction: 'up' | 'down') => {
-    if (isPreview || disabled) return
+  const moveBlock = (id: string, direction: "up" | "down") => {
+    if (isPreview || disabled) return;
 
-    const blockIndex = conditionalBlocks.findIndex((block) => block.id === id)
+    const blockIndex = conditionalBlocks.findIndex((block) => block.id === id);
     if (
-      (direction === 'up' && blockIndex === 0) ||
-      (direction === 'down' && blockIndex === conditionalBlocks.length - 1)
+      (direction === "up" && blockIndex === 0) ||
+      (direction === "down" && blockIndex === conditionalBlocks.length - 1)
     )
-      return
+      return;
 
-    const newBlocks = [...conditionalBlocks]
-    const targetIndex = direction === 'up' ? blockIndex - 1 : blockIndex + 1
-    ;[newBlocks[blockIndex], newBlocks[targetIndex]] = [
+    const newBlocks = [...conditionalBlocks];
+    const targetIndex = direction === "up" ? blockIndex - 1 : blockIndex + 1;
+    [newBlocks[blockIndex], newBlocks[targetIndex]] = [
       newBlocks[targetIndex],
       newBlocks[blockIndex],
-    ]
-    setConditionalBlocks(updateBlockTitles(newBlocks))
-  }
+    ];
+    setConditionalBlocks(updateBlockTitles(newBlocks));
+  };
 
   // Add useEffect to handle keyboard events for both dropdowns
   useEffect(() => {
     conditionalBlocks.forEach((block) => {
-      const textarea = containerRef.current?.querySelector(`[data-block-id="${block.id}"] textarea`)
+      const textarea = containerRef.current?.querySelector(
+        `[data-block-id="${block.id}"] textarea`
+      );
       if (textarea) {
-        textarea.addEventListener('keydown', (e: Event) => {
-          if ((e as KeyboardEvent).key === 'Escape') {
+        textarea.addEventListener("keydown", (e: Event) => {
+          if ((e as KeyboardEvent).key === "Escape") {
             setConditionalBlocks((blocks) =>
               blocks.map((b) =>
                 b.id === block.id
@@ -552,162 +592,173 @@ export function ConditionInput({
                       ...b,
                       showTags: false,
                       showEnvVars: false,
-                      searchTerm: '',
+                      searchTerm: "",
                     }
                   : b
               )
-            )
+            );
           }
-        })
+        });
       }
-    })
-  }, [conditionalBlocks.length])
+    });
+  }, [conditionalBlocks.length]);
 
   // Show loading or empty state if not ready or no blocks
   if (!isReady || conditionalBlocks.length === 0) {
     return (
-      <div className='flex min-h-[150px] items-center justify-center text-muted-foreground'>
+      <div className="flex min-h-[150px] items-center justify-center text-muted-foreground">
         Loading conditions...
       </div>
-    )
+    );
   }
 
   return (
-    <div className='space-y-4' ref={containerRef}>
+    <div className="space-y-4" ref={containerRef}>
       {conditionalBlocks.map((block, index) => (
         <div
           key={block.id}
-          className='group relative overflow-visible rounded-lg border bg-background'
+          className="group relative overflow-visible rounded-lg border bg-background"
         >
           <div
             className={cn(
-              'flex h-10 items-center justify-between overflow-hidden bg-card px-3',
-              block.title === 'else' ? 'rounded-lg border-0' : 'rounded-t-lg border-b'
+              "flex h-10 items-center justify-between overflow-hidden bg-card px-3",
+              block.title === "else"
+                ? "rounded-lg border-0"
+                : "rounded-t-lg border-b"
             )}
           >
-            <span className='font-medium text-sm'>{block.title}</span>
+            <span className="font-medium text-sm">{block.title}</span>
             <Handle
-              type='source'
+              type="source"
               position={Position.Right}
               id={`condition-${block.id}`}
               key={`${block.id}-${index}`}
               className={cn(
-                '!w-[7px] !h-5',
-                '!bg-slate-300 dark:!bg-slate-500 !rounded-[2px] !border-none',
-                '!z-[30]',
-                'group-hover:!shadow-[0_0_0_3px_rgba(156,163,175,0.15)]',
-                'hover:!w-[10px] hover:!right-[-28px] hover:!rounded-r-full hover:!rounded-l-none',
-                '!cursor-crosshair',
-                'transition-all duration-150',
-                '!right-[-25px]'
+                "!w-[7px] !h-5",
+                "!bg-slate-300 dark:!bg-slate-500 !rounded-[2px] !border-none",
+                "!z-[30]",
+                "group-hover:!shadow-[0_0_0_3px_rgba(156,163,175,0.15)]",
+                "hover:!w-[10px] hover:!right-[-28px] hover:!rounded-r-full hover:!rounded-l-none",
+                "!cursor-crosshair",
+                "transition-all duration-150",
+                "!right-[-25px]"
               )}
               data-nodeid={`${blockId}-${subBlockId}`}
               data-handleid={`condition-${block.id}`}
               style={{
-                top: '50%',
-                transform: 'translateY(-50%)',
+                top: "50%",
+                transform: "translateY(-50%)",
               }}
               isConnectableStart={true}
               isConnectableEnd={false}
               isValidConnection={(connection) => {
                 // Prevent self-connections
-                if (connection.source === connection.target) return false
+                if (connection.source === connection.target) return false;
 
                 // Existing validation to prevent connections within the same parent node
-                const sourceNodeId = connection.source?.split('-')[0]
-                const targetNodeId = connection.target?.split('-')[0]
-                return sourceNodeId !== targetNodeId
+                const sourceNodeId = connection.source?.split("-")[0];
+                const targetNodeId = connection.target?.split("-")[0];
+                return sourceNodeId !== targetNodeId;
               }}
             />
-            <div className='flex items-center gap-1'>
+            <div className="flex items-center gap-1">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant='ghost'
-                    size='sm'
+                    variant="ghost"
+                    size="sm"
                     onClick={() => addBlock(block.id)}
                     disabled={isPreview || disabled}
-                    className='h-8 w-8'
+                    className="h-8 w-8"
                   >
-                    <Plus className='h-4 w-4' />
-                    <span className='sr-only'>Add Block</span>
+                    <Plus className="h-4 w-4" />
+                    <span className="sr-only">添加分支</span>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Add Block</TooltipContent>
+                <TooltipContent>添加分支</TooltipContent>
               </Tooltip>
 
-              <div className='flex items-center'>
+              <div className="flex items-center">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      variant='ghost'
-                      size='sm'
-                      onClick={() => moveBlock(block.id, 'up')}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => moveBlock(block.id, "up")}
                       disabled={isPreview || index === 0 || disabled}
-                      className='h-8 w-8'
+                      className="h-8 w-8"
                     >
-                      <ChevronUp className='h-4 w-4' />
-                      <span className='sr-only'>Move Up</span>
+                      <ChevronUp className="h-4 w-4" />
+                      <span className="sr-only">上移</span>
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Move Up</TooltipContent>
+                  <TooltipContent>上移</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      variant='ghost'
-                      size='sm'
-                      onClick={() => moveBlock(block.id, 'down')}
-                      disabled={isPreview || index === conditionalBlocks.length - 1 || disabled}
-                      className='h-8 w-8'
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => moveBlock(block.id, "down")}
+                      disabled={
+                        isPreview ||
+                        index === conditionalBlocks.length - 1 ||
+                        disabled
+                      }
+                      className="h-8 w-8"
                     >
-                      <ChevronDown className='h-4 w-4' />
-                      <span className='sr-only'>Move Down</span>
+                      <ChevronDown className="h-4 w-4" />
+                      <span className="sr-only">下移</span>
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>Move Down</TooltipContent>
+                  <TooltipContent>下移</TooltipContent>
                 </Tooltip>
               </div>
 
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant='ghost'
-                    size='sm'
+                    variant="ghost"
+                    size="sm"
                     onClick={() => removeBlock(block.id)}
-                    disabled={isPreview || conditionalBlocks.length === 1 || disabled}
-                    className='h-8 w-8 text-destructive hover:text-destructive'
+                    disabled={
+                      isPreview || conditionalBlocks.length === 1 || disabled
+                    }
+                    className="h-8 w-8 text-destructive hover:text-destructive"
                   >
-                    <Trash className='h-4 w-4' />
-                    <span className='sr-only'>Delete Block</span>
+                    <Trash className="h-4 w-4" />
+                    <span className="sr-only">删除分支</span>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Delete Condition</TooltipContent>
+                <TooltipContent>删除分支</TooltipContent>
               </Tooltip>
             </div>
           </div>
-          {block.title !== 'else' && (
+          {block.title !== "else" && (
             <div
               className={cn(
-                'relative min-h-[100px] rounded-b-lg bg-background font-mono text-sm',
-                isConnecting && 'ring-2 ring-blue-500 ring-offset-2'
+                "relative min-h-[100px] rounded-b-lg bg-background font-mono text-sm",
+                isConnecting && "ring-2 ring-blue-500 ring-offset-2"
               )}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => handleDrop(block.id, e)}
             >
               {/* Line numbers */}
               <div
-                className='absolute top-0 bottom-0 left-0 flex w-[30px] select-none flex-col items-end bg-muted/30 pt-3 pr-3'
-                aria-hidden='true'
+                className="absolute top-0 bottom-0 left-0 flex w-[30px] select-none flex-col items-end bg-muted/30 pt-3 pr-3"
+                aria-hidden="true"
               >
                 {renderLineNumbers(block.id)}
               </div>
 
-              <div className='relative mt-0 pt-0 pl-[30px]' data-block-id={block.id}>
+              <div
+                className="relative mt-0 pt-0 pl-[30px]"
+                data-block-id={block.id}
+              >
                 {block.value.length === 0 && (
-                  <div className='pointer-events-none absolute top-[12px] left-[42px] select-none text-muted-foreground/50'>
-                    {'<response> === true'}
+                  <div className="pointer-events-none absolute top-[12px] left-[42px] select-none text-muted-foreground/50">
+                    {"<response> === true"}
                   </div>
                 )}
                 <Editor
@@ -716,12 +767,12 @@ export function ConditionInput({
                     if (!isPreview && !disabled) {
                       const textarea = containerRef.current?.querySelector(
                         `[data-block-id="${block.id}"] textarea`
-                      ) as HTMLTextAreaElement | null
+                      ) as HTMLTextAreaElement | null;
                       if (textarea) {
-                        const pos = textarea.selectionStart ?? 0
+                        const pos = textarea.selectionStart ?? 0;
 
-                        const tagTrigger = checkTagTrigger(newCode, pos)
-                        const envVarTrigger = checkEnvVarTrigger(newCode, pos)
+                        const tagTrigger = checkTagTrigger(newCode, pos);
+                        const envVarTrigger = checkEnvVarTrigger(newCode, pos);
 
                         setConditionalBlocks((blocks) =>
                           blocks.map((b) => {
@@ -731,53 +782,68 @@ export function ConditionInput({
                                 value: newCode,
                                 showTags: tagTrigger.show,
                                 showEnvVars: envVarTrigger.show,
-                                searchTerm: envVarTrigger.show ? envVarTrigger.searchTerm : '',
+                                searchTerm: envVarTrigger.show
+                                  ? envVarTrigger.searchTerm
+                                  : "",
                                 cursorPosition: pos,
-                                activeSourceBlockId: tagTrigger.show ? b.activeSourceBlockId : null,
-                              }
+                                activeSourceBlockId: tagTrigger.show
+                                  ? b.activeSourceBlockId
+                                  : null,
+                              };
                             }
-                            return b
+                            return b;
                           })
-                        )
+                        );
                       }
                     }
                   }}
                   onKeyDown={(e) => {
-                    if (e.key === 'Escape') {
+                    if (e.key === "Escape") {
                       setConditionalBlocks((blocks) =>
                         blocks.map((b) =>
-                          b.id === block.id ? { ...b, showTags: false, showEnvVars: false } : b
+                          b.id === block.id
+                            ? { ...b, showTags: false, showEnvVars: false }
+                            : b
                         )
-                      )
+                      );
                     }
                   }}
-                  highlight={(code) => highlight(code, languages.javascript, 'javascript')}
+                  highlight={(code) =>
+                    highlight(code, languages.javascript, "javascript")
+                  }
                   padding={12}
                   style={{
-                    fontFamily: 'inherit',
-                    minHeight: '46px',
-                    lineHeight: '21px',
+                    fontFamily: "inherit",
+                    minHeight: "46px",
+                    lineHeight: "21px",
                   }}
-                  className={cn('focus:outline-none', isPreview && 'cursor-not-allowed opacity-50')}
+                  className={cn(
+                    "focus:outline-none",
+                    isPreview && "cursor-not-allowed opacity-50"
+                  )}
                   textareaClassName={cn(
-                    'focus:outline-none focus:ring-0 bg-transparent',
-                    isPreview && 'pointer-events-none'
+                    "focus:outline-none focus:ring-0 bg-transparent",
+                    isPreview && "pointer-events-none"
                   )}
                 />
 
                 {block.showEnvVars && (
                   <EnvVarDropdown
                     visible={block.showEnvVars}
-                    onSelect={(newValue) => handleEnvVarSelectImmediate(block.id, newValue)}
+                    onSelect={(newValue) =>
+                      handleEnvVarSelectImmediate(block.id, newValue)
+                    }
                     searchTerm={block.searchTerm}
                     inputValue={block.value}
                     cursorPosition={block.cursorPosition}
                     onClose={() => {
                       setConditionalBlocks((blocks) =>
                         blocks.map((b) =>
-                          b.id === block.id ? { ...b, showEnvVars: false, searchTerm: '' } : b
+                          b.id === block.id
+                            ? { ...b, showEnvVars: false, searchTerm: "" }
+                            : b
                         )
-                      )
+                      );
                     }}
                   />
                 )}
@@ -785,7 +851,9 @@ export function ConditionInput({
                 {block.showTags && (
                   <TagDropdown
                     visible={block.showTags}
-                    onSelect={(newValue) => handleTagSelectImmediate(block.id, newValue)}
+                    onSelect={(newValue) =>
+                      handleTagSelectImmediate(block.id, newValue)
+                    }
                     blockId={blockId}
                     activeSourceBlockId={block.activeSourceBlockId}
                     inputValue={block.value}
@@ -801,7 +869,7 @@ export function ConditionInput({
                               }
                             : b
                         )
-                      )
+                      );
                     }}
                   />
                 )}
@@ -811,5 +879,5 @@ export function ConditionInput({
         </div>
       ))}
     </div>
-  )
+  );
 }

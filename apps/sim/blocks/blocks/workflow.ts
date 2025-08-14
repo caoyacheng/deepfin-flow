@@ -46,18 +46,17 @@ export const WorkflowBlock: BlockConfig = {
   subBlocks: [
     {
       id: "workflowId",
-      title: "Select Workflow",
+      title: "选择工作流",
       type: "dropdown",
       options: getAvailableWorkflows,
       required: true,
     },
     {
       id: "input",
-      title: "Input Variable (Optional)",
+      title: "输入变量 (可选)",
       type: "short-input",
-      placeholder: "Select a variable to pass to the child workflow",
-      description:
-        "This variable will be available as start.input in the child workflow",
+      placeholder: "选择一个变量传递给子工作流",
+      description: "这个变量将在子工作流中作为 start.input 可用",
       required: false,
     },
   ],

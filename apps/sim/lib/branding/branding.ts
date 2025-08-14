@@ -30,7 +30,7 @@ const defaultConfig: BrandConfig = {
   customCssUrl: undefined,
   hideBranding: false,
   footerText: undefined,
-  supportEmail: "help@sim.ai",
+  supportEmail: "help@loongflow.com",
   supportUrl: undefined,
   documentationUrl: undefined,
   termsUrl: undefined,

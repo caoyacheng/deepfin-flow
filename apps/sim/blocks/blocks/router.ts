@@ -114,15 +114,15 @@ export const RouterBlock: BlockConfig<RouterResponse> = {
   subBlocks: [
     {
       id: "prompt",
-      title: "Prompt",
+      title: "提示词",
       type: "long-input",
       layout: "full",
-      placeholder: "Route to the correct block based on the input...",
+      placeholder: "根据输入将请求路由到正确的模块",
       required: true,
     },
     {
       id: "model",
-      title: "Model",
+      title: "模型",
       type: "dropdown",
       layout: "half",
       options: () => {
@@ -140,7 +140,7 @@ export const RouterBlock: BlockConfig<RouterResponse> = {
       title: "API Key",
       type: "short-input",
       layout: "full",
-      placeholder: "Enter your API key",
+      placeholder: "输入你的API密钥",
       password: true,
       connectionDroppable: false,
       required: true,

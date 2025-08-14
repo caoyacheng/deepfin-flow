@@ -1,19 +1,19 @@
-import { useEffect, useRef, useState } from 'react'
-import { SendIcon, XIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import { SendIcon, XIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 interface WandPromptBarProps {
-  isVisible: boolean
-  isLoading: boolean
-  isStreaming: boolean
-  promptValue: string
-  onSubmit: (prompt: string) => void
-  onCancel: () => void
-  onChange: (value: string) => void
-  placeholder?: string
-  className?: string
+  isVisible: boolean;
+  isLoading: boolean;
+  isStreaming: boolean;
+  promptValue: string;
+  onSubmit: (prompt: string) => void;
+  onCancel: () => void;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
 }
 
 export function WandPromptBar({
@@ -24,23 +24,23 @@ export function WandPromptBar({
   onSubmit,
   onCancel,
   onChange,
-  placeholder = 'Describe what you want to generate...',
+  placeholder = "Describe what you want to generate...",
   className,
 }: WandPromptBarProps) {
-  const promptBarRef = useRef<HTMLDivElement>(null)
-  const [isExiting, setIsExiting] = useState(false)
+  const promptBarRef = useRef<HTMLDivElement>(null);
+  const [isExiting, setIsExiting] = useState(false);
 
   // Handle the fade-out animation
   const handleCancel = () => {
     if (!isLoading && !isStreaming) {
-      setIsExiting(true)
+      setIsExiting(true);
       // Wait for animation to complete before actual cancellation
       setTimeout(() => {
-        setIsExiting(false)
-        onCancel()
-      }, 150) // Matches the CSS transition duration
+        setIsExiting(false);
+        onCancel();
+      }, 150); // Matches the CSS transition duration
     }
-  }
+  };
 
   useEffect(() => {
     // Handle click outside
@@ -53,89 +53,96 @@ export function WandPromptBar({
         !isLoading &&
         !isExiting
       ) {
-        handleCancel()
+        handleCancel();
       }
-    }
+    };
 
     // Add event listener
-    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener("mousedown", handleClickOutside);
 
     // Cleanup event listener
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isVisible, isStreaming, isLoading, isExiting, onCancel])
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isVisible, isStreaming, isLoading, isExiting, onCancel]);
 
   // Reset the exit state when visibility changes
   useEffect(() => {
     if (isVisible) {
-      setIsExiting(false)
+      setIsExiting(false);
     }
-  }, [isVisible])
+  }, [isVisible]);
 
   if (!isVisible && !isStreaming && !isExiting) {
-    return null
+    return null;
   }
 
   return (
     <div
       ref={promptBarRef}
       className={cn(
-        '-top-20 absolute right-0 left-0',
-        'rounded-xl border bg-background shadow-lg',
-        'z-9999999 transition-all duration-150',
-        isExiting ? 'opacity-0' : 'opacity-100',
+        "-top-20 absolute right-0 left-0",
+        "rounded-xl border bg-background shadow-lg",
+        "z-9999999 transition-all duration-150",
+        isExiting ? "opacity-0" : "opacity-100",
         className
       )}
     >
-      <div className='flex items-center gap-2 p-2'>
-        <div className={cn('status-indicator ml-1', isStreaming && 'streaming')} />
+      <div className="flex items-center gap-2 p-2">
+        <div
+          className={cn("status-indicator ml-1", isStreaming && "streaming")}
+        />
 
-        <div className='relative flex-1'>
+        <div className="relative flex-1">
           <Input
-            value={isStreaming ? 'Generating...' : promptValue}
+            value={isStreaming ? "生成中..." : promptValue}
             onChange={(e) => !isStreaming && onChange(e.target.value)}
             placeholder={placeholder}
             className={cn(
-              'rounded-xl border-0 text-foreground text-sm placeholder:text-muted-foreground/50 focus-visible:ring-0 focus-visible:ring-offset-0',
-              isStreaming && 'text-primary',
-              (isLoading || isStreaming) && 'loading-placeholder'
+              "rounded-xl border-0 text-foreground text-sm placeholder:text-muted-foreground/50 focus-visible:ring-0 focus-visible:ring-offset-0",
+              isStreaming && "text-primary",
+              (isLoading || isStreaming) && "loading-placeholder"
             )}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && !isLoading && !isStreaming && promptValue.trim()) {
-                onSubmit(promptValue)
-              } else if (e.key === 'Escape') {
-                handleCancel()
+              if (
+                e.key === "Enter" &&
+                !isLoading &&
+                !isStreaming &&
+                promptValue.trim()
+              ) {
+                onSubmit(promptValue);
+              } else if (e.key === "Escape") {
+                handleCancel();
               }
             }}
             disabled={isLoading || isStreaming}
             autoFocus={!isStreaming}
           />
           {isStreaming && (
-            <div className='pointer-events-none absolute inset-0 h-full w-full overflow-hidden'>
-              <div className='shimmer-effect' />
+            <div className="pointer-events-none absolute inset-0 h-full w-full overflow-hidden">
+              <div className="shimmer-effect" />
             </div>
           )}
         </div>
 
         <Button
-          variant='ghost'
-          size='icon'
+          variant="ghost"
+          size="icon"
           onClick={handleCancel}
-          className='h-8 w-8 rounded-full text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+          className="h-8 w-8 rounded-full text-muted-foreground hover:bg-accent/50 hover:text-foreground"
         >
-          <XIcon className='h-4 w-4' />
+          <XIcon className="h-4 w-4" />
         </Button>
 
         {!isStreaming && (
           <Button
-            variant='ghost'
-            size='icon'
+            variant="ghost"
+            size="icon"
             onClick={() => onSubmit(promptValue)}
-            className='h-8 w-8 rounded-full text-primary hover:bg-primary/10 hover:text-primary'
+            className="h-8 w-8 rounded-full text-primary hover:bg-primary/10 hover:text-primary"
             disabled={isLoading || isStreaming || !promptValue.trim()}
           >
-            <SendIcon className='h-4 w-4' />
+            <SendIcon className="h-4 w-4" />
           </Button>
         )}
       </div>
@@ -177,7 +184,7 @@ export function WandPromptBar({
         }
 
         .status-indicator.streaming::before {
-          content: '';
+          content: "";
           position: absolute;
           inset: 0;
           border-radius: 50%;
@@ -215,5 +222,5 @@ export function WandPromptBar({
         }
       `}</style>
     </div>
-  )
+  );
 }

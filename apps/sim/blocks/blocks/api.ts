@@ -1,62 +1,62 @@
-import { ApiIcon } from '@/components/icons'
-import type { BlockConfig } from '@/blocks/types'
-import type { RequestResponse } from '@/tools/http/types'
+import type { BlockConfig } from "@/blocks/types";
+import { ApiIcon } from "@/components/icons";
+import type { RequestResponse } from "@/tools/http/types";
 
 export const ApiBlock: BlockConfig<RequestResponse> = {
-  type: 'api',
-  name: 'API',
-  description: 'Use any API',
+  type: "api",
+  name: "API",
+  description: "Use any API",
   longDescription:
-    'Connect to any external API with support for all standard HTTP methods and customizable request parameters. Configure headers, query parameters, and request bodies. Standard headers (User-Agent, Accept, Cache-Control, etc.) are automatically included.',
-  docsLink: 'https://docs.sim.ai/blocks/api',
-  category: 'blocks',
-  bgColor: '#2F55FF',
+    "Connect to any external API with support for all standard HTTP methods and customizable request parameters. Configure headers, query parameters, and request bodies. Standard headers (User-Agent, Accept, Cache-Control, etc.) are automatically included.",
+  docsLink: "https://docs.sim.ai/blocks/api",
+  category: "blocks",
+  bgColor: "#2F55FF",
   icon: ApiIcon,
   subBlocks: [
     {
-      id: 'url',
-      title: 'URL',
-      type: 'short-input',
-      layout: 'full',
-      placeholder: 'Enter URL',
+      id: "url",
+      title: "URL",
+      type: "short-input",
+      layout: "full",
+      placeholder: "输入 URL",
       required: true,
     },
     {
-      id: 'method',
-      title: 'Method',
-      type: 'dropdown',
-      layout: 'half',
+      id: "method",
+      title: "方法",
+      type: "dropdown",
+      layout: "half",
       required: true,
       options: [
-        { label: 'GET', id: 'GET' },
-        { label: 'POST', id: 'POST' },
-        { label: 'PUT', id: 'PUT' },
-        { label: 'DELETE', id: 'DELETE' },
-        { label: 'PATCH', id: 'PATCH' },
+        { label: "GET", id: "GET" },
+        { label: "POST", id: "POST" },
+        { label: "PUT", id: "PUT" },
+        { label: "DELETE", id: "DELETE" },
+        { label: "PATCH", id: "PATCH" },
       ],
     },
     {
-      id: 'params',
-      title: 'Query Params',
-      type: 'table',
-      layout: 'full',
-      columns: ['Key', 'Value'],
+      id: "params",
+      title: "查询参数",
+      type: "table",
+      layout: "full",
+      columns: ["Key", "Value"],
     },
     {
-      id: 'headers',
-      title: 'Headers',
-      type: 'table',
-      layout: 'full',
-      columns: ['Key', 'Value'],
+      id: "headers",
+      title: "Headers",
+      type: "table",
+      layout: "full",
+      columns: ["Key", "Value"],
       description:
-        'Custom headers (standard headers like User-Agent, Accept, etc. are added automatically)',
+        "Custom headers (standard headers like User-Agent, Accept, etc. are added automatically)",
     },
     {
-      id: 'body',
-      title: 'Body',
-      type: 'code',
-      layout: 'full',
-      placeholder: 'Enter JSON...',
+      id: "body",
+      title: "Body",
+      type: "code",
+      layout: "full",
+      placeholder: "输入 JSON...",
       wandConfig: {
         enabled: true,
         maintainHistory: true,
@@ -78,24 +78,33 @@ Example:
   "age": <block.function.output.age>,
   "success": true
 }`,
-        placeholder: 'Describe the API request body you need...',
-        generationType: 'json-object',
+        placeholder: "描述你需要的 API 请求体",
+        generationType: "json-object",
       },
     },
   ],
   tools: {
-    access: ['http_request'],
+    access: ["http_request"],
   },
   inputs: {
-    url: { type: 'string', description: 'Request URL' },
-    method: { type: 'string', description: 'HTTP method' },
-    headers: { type: 'json', description: 'Request headers' },
-    body: { type: 'json', description: 'Request body data' },
-    params: { type: 'json', description: 'URL query parameters' },
+    url: { type: "string", description: "Request URL" },
+    method: { type: "string", description: "HTTP method" },
+    headers: { type: "json", description: "Request headers" },
+    body: { type: "json", description: "Request body data" },
+    params: { type: "json", description: "URL query parameters" },
   },
   outputs: {
-    data: { type: 'json', description: 'API response data (JSON, text, or other formats)' },
-    status: { type: 'number', description: 'HTTP status code (200, 404, 500, etc.)' },
-    headers: { type: 'json', description: 'HTTP response headers as key-value pairs' },
+    data: {
+      type: "json",
+      description: "API response data (JSON, text, or other formats)",
+    },
+    status: {
+      type: "number",
+      description: "HTTP status code (200, 404, 500, etc.)",
+    },
+    headers: {
+      type: "json",
+      description: "HTTP response headers as key-value pairs",
+    },
   },
-}
+};

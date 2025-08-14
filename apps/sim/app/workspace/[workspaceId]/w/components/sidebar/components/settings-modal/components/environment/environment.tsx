@@ -263,7 +263,7 @@ export function EnvironmentVariables({
         onClick={handleValueClick}
         onBlur={() => setFocusedValueIndex(null)}
         onPaste={(e) => handlePaste(e, originalIndex)}
-        placeholder="Enter value"
+        placeholder="输入值"
         className="allow-scroll"
         autoComplete="off"
         autoCorrect="off"

@@ -1,39 +1,42 @@
-import { and, eq } from 'drizzle-orm'
-import { type NextRequest, NextResponse } from 'next/server'
-import { createLogger } from '@/lib/logs/console/logger'
-import { db } from '@/db'
-import { memory } from '@/db/schema'
+import { db } from "@/db";
+import { memory } from "@/db/schema";
+import { createLogger } from "@/lib/logs/console/logger";
+import { and, eq } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 
-const logger = createLogger('MemoryByIdAPI')
+const logger = createLogger("MemoryByIdAPI");
 
-export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 /**
  * GET handler for retrieving a specific memory by ID
  */
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const requestId = crypto.randomUUID().slice(0, 8)
-  const { id } = await params
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const requestId = crypto.randomUUID().slice(0, 8);
+  const { id } = await params;
 
   try {
-    logger.info(`[${requestId}] Processing memory get request for ID: ${id}`)
+    logger.info(`[${requestId}] Processing memory get request for ID: ${id}`);
 
     // Get workflowId from query parameter (required)
-    const url = new URL(request.url)
-    const workflowId = url.searchParams.get('workflowId')
+    const url = new URL(request.url);
+    const workflowId = url.searchParams.get("workflowId");
 
     if (!workflowId) {
-      logger.warn(`[${requestId}] Missing required parameter: workflowId`)
+      logger.warn(`[${requestId}] Missing required parameter: workflowId`);
       return NextResponse.json(
         {
           success: false,
           error: {
-            message: 'workflowId parameter is required',
+            message: "workflowId parameter is required",
           },
         },
         { status: 400 }
-      )
+      );
     }
 
     // Query the database for the memory
@@ -42,39 +45,39 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       .from(memory)
       .where(and(eq(memory.key, id), eq(memory.workflowId, workflowId)))
       .orderBy(memory.createdAt)
-      .limit(1)
+      .limit(1);
 
     if (memories.length === 0) {
-      logger.warn(`[${requestId}] Memory not found: ${id} for workflow: ${workflowId}`)
+      logger.warn(`[${requestId}] 未找到记忆: ${id}，工作流: ${workflowId}`);
       return NextResponse.json(
         {
           success: false,
           error: {
-            message: 'Memory not found',
+            message: "未找到记忆",
           },
         },
         { status: 404 }
-      )
+      );
     }
 
-    logger.info(`[${requestId}] Memory retrieved successfully: ${id} for workflow: ${workflowId}`)
+    logger.info(`[${requestId}] 成功获取记忆: ${id}，工作流: ${workflowId}`);
     return NextResponse.json(
       {
         success: true,
         data: memories[0],
       },
       { status: 200 }
-    )
+    );
   } catch (error: any) {
     return NextResponse.json(
       {
         success: false,
         error: {
-          message: error.message || 'Failed to retrieve memory',
+          message: error.message || "获取记忆失败",
         },
       },
       { status: 500 }
-    )
+    );
   }
 }
 
@@ -85,27 +88,27 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const requestId = crypto.randomUUID().slice(0, 8)
-  const { id } = await params
+  const requestId = crypto.randomUUID().slice(0, 8);
+  const { id } = await params;
 
   try {
-    logger.info(`[${requestId}] Processing memory delete request for ID: ${id}`)
+    logger.info(`[${requestId}] 正在处理删除记忆请求，ID: ${id}`);
 
     // Get workflowId from query parameter (required)
-    const url = new URL(request.url)
-    const workflowId = url.searchParams.get('workflowId')
+    const url = new URL(request.url);
+    const workflowId = url.searchParams.get("workflowId");
 
     if (!workflowId) {
-      logger.warn(`[${requestId}] Missing required parameter: workflowId`)
+      logger.warn(`[${requestId}] 缺少必需参数: workflowId`);
       return NextResponse.json(
         {
           success: false,
           error: {
-            message: 'workflowId parameter is required',
+            message: "workflowId 参数是必需的",
           },
         },
         { status: 400 }
-      )
+      );
     }
 
     // Verify memory exists before attempting to delete
@@ -113,83 +116,88 @@ export async function DELETE(
       .select({ id: memory.id })
       .from(memory)
       .where(and(eq(memory.key, id), eq(memory.workflowId, workflowId)))
-      .limit(1)
+      .limit(1);
 
     if (existingMemory.length === 0) {
-      logger.warn(`[${requestId}] Memory not found: ${id} for workflow: ${workflowId}`)
+      logger.warn(`[${requestId}] 未找到记忆: ${id}，工作流: ${workflowId}`);
       return NextResponse.json(
         {
           success: false,
           error: {
-            message: 'Memory not found',
+            message: "未找到记忆",
           },
         },
         { status: 404 }
-      )
+      );
     }
 
     // Hard delete the memory
-    await db.delete(memory).where(and(eq(memory.key, id), eq(memory.workflowId, workflowId)))
+    await db
+      .delete(memory)
+      .where(and(eq(memory.key, id), eq(memory.workflowId, workflowId)));
 
-    logger.info(`[${requestId}] Memory deleted successfully: ${id} for workflow: ${workflowId}`)
+    logger.info(`[${requestId}] 记忆删除成功: ${id}，工作流: ${workflowId}`);
     return NextResponse.json(
       {
         success: true,
-        data: { message: 'Memory deleted successfully' },
+        data: { message: "记忆删除成功" },
       },
       { status: 200 }
-    )
+    );
   } catch (error: any) {
     return NextResponse.json(
       {
         success: false,
         error: {
-          message: error.message || 'Failed to delete memory',
+          message: error.message || "记忆删除失败",
         },
       },
       { status: 500 }
-    )
+    );
   }
 }
 
 /**
  * PUT handler for updating a specific memory
  */
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const requestId = crypto.randomUUID().slice(0, 8)
-  const { id } = await params
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const requestId = crypto.randomUUID().slice(0, 8);
+  const { id } = await params;
 
   try {
-    logger.info(`[${requestId}] Processing memory update request for ID: ${id}`)
+    logger.info(`[${requestId}] 正在处理更新记忆请求，ID: ${id}`);
 
     // Parse request body
-    const body = await request.json()
-    const { data, workflowId } = body
+    const body = await request.json();
+    const { data, workflowId } = body;
 
     if (!data) {
-      logger.warn(`[${requestId}] Missing required field: data`)
+      logger.warn(`[${requestId}] 缺少必需字段: data`);
       return NextResponse.json(
         {
           success: false,
           error: {
-            message: 'Memory data is required',
+            message: "记忆数据为必填项",
           },
         },
         { status: 400 }
-      )
+      );
     }
 
     if (!workflowId) {
-      logger.warn(`[${requestId}] Missing required field: workflowId`)
+      logger.warn(`[${requestId}] 缺少必需字段: workflowId`);
       return NextResponse.json(
         {
           success: false,
           error: {
-            message: 'workflowId is required',
+            message: "workflowId 为必填项",
           },
         },
         { status: 400 }
-      )
+      );
     }
 
     // Verify memory exists before attempting to update
@@ -197,79 +205,81 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       .select()
       .from(memory)
       .where(and(eq(memory.key, id), eq(memory.workflowId, workflowId)))
-      .limit(1)
+      .limit(1);
 
     if (existingMemories.length === 0) {
-      logger.warn(`[${requestId}] Memory not found: ${id} for workflow: ${workflowId}`)
+      logger.warn(`[${requestId}] 未找到记忆: ${id}，工作流: ${workflowId}`);
       return NextResponse.json(
         {
           success: false,
           error: {
-            message: 'Memory not found',
+            message: "未找到记忆",
           },
         },
         { status: 404 }
-      )
+      );
     }
 
-    const existingMemory = existingMemories[0]
+    const existingMemory = existingMemories[0];
 
     // Validate memory data based on the existing memory type
-    if (existingMemory.type === 'agent') {
+    if (existingMemory.type === "agent") {
       if (!data.role || !data.content) {
-        logger.warn(`[${requestId}] Missing agent memory fields`)
+        logger.warn(`[${requestId}] 缺少必需字段: role 或 content`);
         return NextResponse.json(
           {
             success: false,
             error: {
-              message: 'Agent memory requires role and content',
+              message: "Agent 记忆需要 role 和 content",
             },
           },
           { status: 400 }
-        )
+        );
       }
 
-      if (!['user', 'assistant', 'system'].includes(data.role)) {
-        logger.warn(`[${requestId}] Invalid agent role: ${data.role}`)
+      if (!["user", "assistant", "system"].includes(data.role)) {
+        logger.warn(`[${requestId}] 无效的 agent 角色: ${data.role}`);
         return NextResponse.json(
           {
             success: false,
             error: {
-              message: 'Agent role must be user, assistant, or system',
+              message: "Agent 角色必须是 user, assistant, 或 system",
             },
           },
           { status: 400 }
-        )
+        );
       }
     }
 
     // Update the memory with new data
-    await db.delete(memory).where(and(eq(memory.key, id), eq(memory.workflowId, workflowId)))
+    await db
+      .delete(memory)
+      .where(and(eq(memory.key, id), eq(memory.workflowId, workflowId)));
 
     // Fetch the updated memory
     const updatedMemories = await db
       .select()
       .from(memory)
       .where(and(eq(memory.key, id), eq(memory.workflowId, workflowId)))
-      .limit(1)
+      .limit(1);
 
-    logger.info(`[${requestId}] Memory updated successfully: ${id} for workflow: ${workflowId}`)
+    logger.info(`[${requestId}] 记忆更新成功: ${id}，工作流: ${workflowId}`);
     return NextResponse.json(
       {
         success: true,
         data: updatedMemories[0],
       },
       { status: 200 }
-    )
+    );
   } catch (error: any) {
     return NextResponse.json(
       {
         success: false,
         error: {
-          message: error.message || 'Failed to update memory',
+          message: error.message || "记忆更新失败",
         },
       },
       { status: 500 }
-    )
+    );
   }
 }

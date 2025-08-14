@@ -15,28 +15,28 @@ export const ResponseBlock: BlockConfig<ResponseBlockOutput> = {
   subBlocks: [
     {
       id: "dataMode",
-      title: "Response Data Mode",
+      title: "响应数据模式",
       type: "dropdown",
       layout: "full",
       options: [
-        { label: "Builder", id: "structured" },
-        { label: "Editor", id: "json" },
+        { label: "构建器", id: "structured" },
+        { label: "编辑器", id: "json" },
       ],
       value: () => "structured",
-      description: "Choose how to define your response data structure",
+      description: "选择如何定义你的响应数据结构",
     },
     {
       id: "builderData",
-      title: "Response Structure",
+      title: "响应结构",
       type: "response-format",
       layout: "full",
       condition: { field: "dataMode", value: "structured" },
       description:
-        "Define the structure of your response data. Use <variable.name> in field names to reference workflow variables.",
+        "定义你的响应数据结构。使用<variable.name>在字段名称中引用工作流变量。",
     },
     {
       id: "data",
-      title: "Response Data",
+      title: "响应数据",
       type: "code",
       layout: "full",
       placeholder:
@@ -44,7 +44,7 @@ export const ResponseBlock: BlockConfig<ResponseBlockOutput> = {
       language: "json",
       condition: { field: "dataMode", value: "json" },
       description:
-        "Data that will be sent as the response body on API calls. Use <variable.name> to reference workflow variables.",
+        "将作为响应体发送的数据。使用<variable.name>引用工作流变量。",
       wandConfig: {
         enabled: true,
         maintainHistory: true,
@@ -66,25 +66,25 @@ Example:
   "age": <block.function.output.age>,
   "success": true
 }`,
-        placeholder: "Describe the API response structure you need...",
+        placeholder: "描述你需要的API响应结构",
         generationType: "json-object",
       },
     },
     {
       id: "status",
-      title: "Status Code",
+      title: "状态码",
       type: "short-input",
       layout: "half",
       placeholder: "200",
-      description: "HTTP status code (default: 200)",
+      description: "HTTP状态码(默认: 200)",
     },
     {
       id: "headers",
-      title: "Response Headers",
+      title: "响应头",
       type: "table",
       layout: "full",
       columns: ["Key", "Value"],
-      description: "Additional HTTP headers to include in the response",
+      description: "额外的HTTP头信息",
     },
   ],
   tools: { access: [] },

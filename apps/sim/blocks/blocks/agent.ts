@@ -66,7 +66,7 @@ export const AgentBlock: BlockConfig<AgentResponse> = {
     "Create powerful AI agents using any LLM provider with customizable system prompts and tool integrations.",
   docsLink: "https://docs.sim.ai/blocks/agent",
   category: "blocks",
-  bgColor: "#802FFF",
+  bgColor: "#FF69B4",
   icon: AgentIcon,
   subBlocks: [
     {
@@ -129,7 +129,7 @@ Present findings in executive-ready formats with source citations, highlight key
 
 ### FINAL INSTRUCTION
 Create a system prompt appropriately detailed for the request, using clear language and relevant tool instructions.`,
-        placeholder: "Describe the AI agent you want to create...",
+        placeholder: "描述你想要创建的 AI 智能体",
         generationType: "system-prompt",
       },
     },
@@ -359,7 +359,7 @@ Example 3 (Array Input):
     }
 }
 `,
-        placeholder: "Describe the JSON schema structure you need...",
+        placeholder: "描述你需要的 JSON schema 结构...",
         generationType: "json-schema",
       },
     },

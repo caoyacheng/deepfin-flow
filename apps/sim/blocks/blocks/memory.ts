@@ -7,23 +7,23 @@ export const MemoryBlock: BlockConfig = {
   description: "添加记忆存储",
   longDescription:
     "创建持久化存储，用于存储需要在多个工作流步骤中访问的数据。在工作流执行过程中存储和检索信息，以维护上下文和状态。",
-  bgColor: "#F64F9E",
+  bgColor: "#FFA500",
   icon: BrainIcon,
   category: "blocks",
   docsLink: "https://docs.sim.ai/tools/memory",
   subBlocks: [
     {
       id: "operation",
-      title: "Operation",
+      title: "操作",
       type: "dropdown",
       layout: "full",
       options: [
-        { label: "Add Memory", id: "add" },
-        { label: "Get All Memories", id: "getAll" },
-        { label: "Get Memory", id: "get" },
-        { label: "Delete Memory", id: "delete" },
+        { label: "添加记忆", id: "add" },
+        { label: "获取所有记忆", id: "getAll" },
+        { label: "获取记忆", id: "get" },
+        { label: "删除记忆", id: "delete" },
       ],
-      placeholder: "Select operation",
+      placeholder: "选择操作",
       value: () => "add",
     },
     {
@@ -31,7 +31,7 @@ export const MemoryBlock: BlockConfig = {
       title: "ID",
       type: "short-input",
       layout: "full",
-      placeholder: "Enter memory identifier",
+      placeholder: "输入要添加的记忆标识符",
       condition: {
         field: "operation",
         value: "add",
@@ -43,7 +43,7 @@ export const MemoryBlock: BlockConfig = {
       title: "ID",
       type: "short-input",
       layout: "full",
-      placeholder: "Enter memory identifier to retrieve",
+      placeholder: "输入要获取的记忆标识符",
       condition: {
         field: "operation",
         value: "get",
@@ -55,7 +55,7 @@ export const MemoryBlock: BlockConfig = {
       title: "ID",
       type: "short-input",
       layout: "full",
-      placeholder: "Enter memory identifier to delete",
+      placeholder: "输入要删除的记忆标识符",
       condition: {
         field: "operation",
         value: "delete",
@@ -64,7 +64,7 @@ export const MemoryBlock: BlockConfig = {
     },
     {
       id: "role",
-      title: "Role",
+      title: "角色",
       type: "dropdown",
       layout: "full",
       options: [
@@ -72,7 +72,7 @@ export const MemoryBlock: BlockConfig = {
         { label: "Assistant", id: "assistant" },
         { label: "System", id: "system" },
       ],
-      placeholder: "Select agent role",
+      placeholder: "选择角色",
       condition: {
         field: "operation",
         value: "add",
@@ -81,10 +81,10 @@ export const MemoryBlock: BlockConfig = {
     },
     {
       id: "content",
-      title: "Content",
+      title: "内容",
       type: "short-input",
       layout: "full",
-      placeholder: "Enter message content",
+      placeholder: "输入消息内容",
       condition: {
         field: "operation",
         value: "add",

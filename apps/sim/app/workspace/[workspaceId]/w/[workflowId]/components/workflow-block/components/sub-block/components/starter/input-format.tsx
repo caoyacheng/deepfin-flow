@@ -59,7 +59,7 @@ export function FieldFormat({
   emptyMessage = "No fields defined",
   showType = true,
   showValue = false,
-  valuePlaceholder = "Enter value or <variable.name>",
+  valuePlaceholder = "输入值或 <variable.name>",
   isConnecting = false,
   config,
 }: FieldFormatProps) {
@@ -503,7 +503,7 @@ export function ResponseFormat(
       emptyMessage="未定义任何输出字段"
       showType={false}
       showValue={true}
-      valuePlaceholder="Enter value or <variable.name>"
+      valuePlaceholder="输入值或 <variable.name>"
     />
   );
 }
