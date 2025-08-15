@@ -4,58 +4,74 @@ import {
   airtableGetRecordTool,
   airtableListRecordsTool,
   airtableUpdateRecordTool,
-} from '@/tools/airtable'
-import { arxivGetAuthorPapersTool, arxivGetPaperTool, arxivSearchTool } from '@/tools/arxiv'
-import { browserUseRunTaskTool } from '@/tools/browser_use'
-import { clayPopulateTool } from '@/tools/clay'
-import { confluenceRetrieveTool, confluenceUpdateTool } from '@/tools/confluence'
+} from "@/tools/airtable";
+import {
+  arxivGetAuthorPapersTool,
+  arxivGetPaperTool,
+  arxivSearchTool,
+} from "@/tools/arxiv";
+import { browserUseRunTaskTool } from "@/tools/browser_use";
+import { clayPopulateTool } from "@/tools/clay";
+import {
+  confluenceRetrieveTool,
+  confluenceUpdateTool,
+} from "@/tools/confluence";
 import {
   discordGetMessagesTool,
   discordGetServerTool,
   discordGetUserTool,
   discordSendMessageTool,
-} from '@/tools/discord'
-import { elevenLabsTtsTool } from '@/tools/elevenlabs'
+} from "@/tools/discord";
+import { elevenLabsTtsTool } from "@/tools/elevenlabs";
 import {
   exaAnswerTool,
   exaFindSimilarLinksTool,
   exaGetContentsTool,
   exaResearchTool,
   exaSearchTool,
-} from '@/tools/exa'
-import { fileParseTool } from '@/tools/file'
-import { crawlTool, scrapeTool, searchTool } from '@/tools/firecrawl'
-import { functionExecuteTool } from '@/tools/function'
+} from "@/tools/exa";
+import { fileParseTool } from "@/tools/file";
+import { crawlTool, scrapeTool, searchTool } from "@/tools/firecrawl";
+import { functionExecuteTool } from "@/tools/function";
 import {
   githubCommentTool,
   githubLatestCommitTool,
   githubPrTool,
   githubRepoInfoTool,
-} from '@/tools/github'
-import { gmailDraftTool, gmailReadTool, gmailSearchTool, gmailSendTool } from '@/tools/gmail'
-import { searchTool as googleSearchTool } from '@/tools/google'
+} from "@/tools/github";
+import {
+  gmailDraftTool,
+  gmailReadTool,
+  gmailSearchTool,
+  gmailSendTool,
+} from "@/tools/gmail";
+import { searchTool as googleSearchTool } from "@/tools/google";
 import {
   googleCalendarCreateTool,
   googleCalendarGetTool,
   googleCalendarInviteTool,
   googleCalendarListTool,
   googleCalendarQuickAddTool,
-} from '@/tools/google_calendar'
-import { googleDocsCreateTool, googleDocsReadTool, googleDocsWriteTool } from '@/tools/google_docs'
+} from "@/tools/google_calendar";
+import {
+  googleDocsCreateTool,
+  googleDocsReadTool,
+  googleDocsWriteTool,
+} from "@/tools/google_docs";
 import {
   googleDriveCreateFolderTool,
   googleDriveGetContentTool,
   googleDriveListTool,
   googleDriveUploadTool,
-} from '@/tools/google_drive'
+} from "@/tools/google_drive";
 import {
   googleSheetsAppendTool,
   googleSheetsReadTool,
   googleSheetsUpdateTool,
   googleSheetsWriteTool,
-} from '@/tools/google_sheets'
-import { requestTool as httpRequest } from '@/tools/http'
-import { huggingfaceChatTool } from '@/tools/huggingface'
+} from "@/tools/google_sheets";
+import { requestTool as httpRequest } from "@/tools/http";
+import { huggingfaceChatTool } from "@/tools/huggingface";
 import {
   hunterCompaniesFindTool,
   hunterDiscoverTool,
@@ -63,34 +79,48 @@ import {
   hunterEmailCountTool,
   hunterEmailFinderTool,
   hunterEmailVerifierTool,
-} from '@/tools/hunter'
-import { readUrlTool } from '@/tools/jina'
-import { jiraBulkRetrieveTool, jiraRetrieveTool, jiraUpdateTool, jiraWriteTool } from '@/tools/jira'
+} from "@/tools/hunter";
+import { readUrlTool } from "@/tools/jina";
+import {
+  jiraBulkRetrieveTool,
+  jiraRetrieveTool,
+  jiraUpdateTool,
+  jiraWriteTool,
+} from "@/tools/jira";
 import {
   knowledgeCreateDocumentTool,
   knowledgeSearchTool,
   knowledgeUploadChunkTool,
-} from '@/tools/knowledge'
-import { linearCreateIssueTool, linearReadIssuesTool } from '@/tools/linear'
-import { linkupSearchTool } from '@/tools/linkup'
-import { mem0AddMemoriesTool, mem0GetMemoriesTool, mem0SearchMemoriesTool } from '@/tools/mem0'
-import { memoryAddTool, memoryDeleteTool, memoryGetAllTool, memoryGetTool } from '@/tools/memory'
+} from "@/tools/knowledge";
+import { linearCreateIssueTool, linearReadIssuesTool } from "@/tools/linear";
+import { linkupSearchTool } from "@/tools/linkup";
+import {
+  mem0AddMemoriesTool,
+  mem0GetMemoriesTool,
+  mem0SearchMemoriesTool,
+} from "@/tools/mem0";
+import {
+  memoryAddTool,
+  memoryDeleteTool,
+  memoryGetAllTool,
+  memoryGetTool,
+} from "@/tools/memory";
 import {
   microsoftExcelReadTool,
   microsoftExcelTableAddTool,
   microsoftExcelWriteTool,
-} from '@/tools/microsoft_excel'
+} from "@/tools/microsoft_excel";
 import {
   microsoftPlannerCreateTaskTool,
   microsoftPlannerReadTaskTool,
-} from '@/tools/microsoft_planner'
+} from "@/tools/microsoft_planner";
 import {
   microsoftTeamsReadChannelTool,
   microsoftTeamsReadChatTool,
   microsoftTeamsWriteChannelTool,
   microsoftTeamsWriteChatTool,
-} from '@/tools/microsoft_teams'
-import { mistralParserTool } from '@/tools/mistral'
+} from "@/tools/microsoft_teams";
+import { mistralParserTool } from "@/tools/mistral";
 import {
   notionCreateDatabaseTool,
   notionCreatePageTool,
@@ -99,43 +129,68 @@ import {
   notionReadTool,
   notionSearchTool,
   notionWriteTool,
-} from '@/tools/notion'
-import { onedriveCreateFolderTool, onedriveListTool, onedriveUploadTool } from '@/tools/onedrive'
-import { imageTool, embeddingsTool as openAIEmbeddings } from '@/tools/openai'
-import { outlookDraftTool, outlookReadTool, outlookSendTool } from '@/tools/outlook'
-import { perplexityChatTool } from '@/tools/perplexity'
+} from "@/tools/notion";
+import {
+  onedriveCreateFolderTool,
+  onedriveListTool,
+  onedriveUploadTool,
+} from "@/tools/onedrive";
+import { imageTool, embeddingsTool as openAIEmbeddings } from "@/tools/openai";
+import {
+  outlookDraftTool,
+  outlookReadTool,
+  outlookSendTool,
+} from "@/tools/outlook";
+import { perplexityChatTool } from "@/tools/perplexity";
 import {
   pineconeFetchTool,
   pineconeGenerateEmbeddingsTool,
   pineconeSearchTextTool,
   pineconeSearchVectorTool,
   pineconeUpsertTextTool,
-} from '@/tools/pinecone'
-import { qdrantFetchTool, qdrantSearchTool, qdrantUpsertTool } from '@/tools/qdrant'
-import { redditGetCommentsTool, redditGetPostsTool, redditHotPostsTool } from '@/tools/reddit'
-import { s3GetObjectTool } from '@/tools/s3'
-import { searchTool as serperSearch } from '@/tools/serper'
+} from "@/tools/pinecone";
+import {
+  qdrantFetchTool,
+  qdrantSearchTool,
+  qdrantUpsertTool,
+} from "@/tools/qdrant";
+import { qwenImageTool } from "@/tools/qwen/image";
+import {
+  redditGetCommentsTool,
+  redditGetPostsTool,
+  redditHotPostsTool,
+} from "@/tools/reddit";
+import { s3GetObjectTool } from "@/tools/s3";
+import { searchTool as serperSearch } from "@/tools/serper";
 import {
   sharepointCreatePageTool,
   sharepointListSitesTool,
   sharepointReadPageTool,
-} from '@/tools/sharepoint'
-import { slackCanvasTool, slackMessageReaderTool, slackMessageTool } from '@/tools/slack'
-import { stagehandAgentTool, stagehandExtractTool } from '@/tools/stagehand'
+} from "@/tools/sharepoint";
+import {
+  slackCanvasTool,
+  slackMessageReaderTool,
+  slackMessageTool,
+} from "@/tools/slack";
+import { stagehandAgentTool, stagehandExtractTool } from "@/tools/stagehand";
 import {
   supabaseDeleteTool,
   supabaseGetRowTool,
   supabaseInsertTool,
   supabaseQueryTool,
   supabaseUpdateTool,
-} from '@/tools/supabase'
-import { tavilyExtractTool, tavilySearchTool } from '@/tools/tavily'
-import { telegramMessageTool } from '@/tools/telegram'
-import { thinkingTool } from '@/tools/thinking'
-import { sendSMSTool } from '@/tools/twilio'
-import { typeformFilesTool, typeformInsightsTool, typeformResponsesTool } from '@/tools/typeform'
-import type { ToolConfig } from '@/tools/types'
-import { visionTool } from '@/tools/vision'
+} from "@/tools/supabase";
+import { tavilyExtractTool, tavilySearchTool } from "@/tools/tavily";
+import { telegramMessageTool } from "@/tools/telegram";
+import { thinkingTool } from "@/tools/thinking";
+import { sendSMSTool } from "@/tools/twilio";
+import {
+  typeformFilesTool,
+  typeformInsightsTool,
+  typeformResponsesTool,
+} from "@/tools/typeform";
+import type { ToolConfig } from "@/tools/types";
+import { visionTool } from "@/tools/vision";
 import {
   wealthboxReadContactTool,
   wealthboxReadNoteTool,
@@ -143,17 +198,17 @@ import {
   wealthboxWriteContactTool,
   wealthboxWriteNoteTool,
   wealthboxWriteTaskTool,
-} from '@/tools/wealthbox'
-import { whatsappSendMessageTool } from '@/tools/whatsapp'
+} from "@/tools/wealthbox";
+import { whatsappSendMessageTool } from "@/tools/whatsapp";
 import {
   wikipediaPageContentTool,
   wikipediaPageSummaryTool,
   wikipediaRandomPageTool,
   wikipediaSearchTool,
-} from '@/tools/wikipedia'
-import { workflowExecutorTool } from '@/tools/workflow'
-import { xReadTool, xSearchTool, xUserTool, xWriteTool } from '@/tools/x'
-import { youtubeSearchTool } from '@/tools/youtube'
+} from "@/tools/wikipedia";
+import { workflowExecutorTool } from "@/tools/workflow";
+import { xReadTool, xSearchTool, xUserTool, xWriteTool } from "@/tools/x";
+import { youtubeSearchTool } from "@/tools/youtube";
 
 // Registry of all available tools
 export const tools: Record<string, ToolConfig> = {
@@ -267,6 +322,7 @@ export const tools: Record<string, ToolConfig> = {
   discord_get_server: discordGetServerTool,
   discord_get_user: discordGetUserTool,
   openai_image: imageTool,
+  qwen_image: qwenImageTool,
   microsoft_teams_read_chat: microsoftTeamsReadChatTool,
   microsoft_teams_write_chat: microsoftTeamsWriteChatTool,
   microsoft_teams_read_channel: microsoftTeamsReadChannelTool,
@@ -314,4 +370,4 @@ export const tools: Record<string, ToolConfig> = {
   sharepoint_list_sites: sharepointListSitesTool,
   // Provider chat tools
   // Provider chat tools - handled separately in agent blocks
-}
+};

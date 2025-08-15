@@ -1,62 +1,63 @@
-import { ElevenLabsIcon } from '@/components/icons'
-import type { BlockConfig } from '@/blocks/types'
-import type { ElevenLabsBlockResponse } from '@/tools/elevenlabs/types'
+import type { BlockConfig } from "@/blocks/types";
+import { ElevenLabsIcon } from "@/components/icons";
+import type { ElevenLabsBlockResponse } from "@/tools/elevenlabs/types";
 
 export const ElevenLabsBlock: BlockConfig<ElevenLabsBlockResponse> = {
-  type: 'elevenlabs',
-  name: 'ElevenLabs',
-  description: 'Convert TTS using ElevenLabs',
-  longDescription: 'Generate realistic speech from text using ElevenLabs voices.',
-  docsLink: 'https://docs.sim.ai/tools/elevenlabs',
-  category: 'tools',
-  bgColor: '#181C1E',
+  type: "elevenlabs",
+  name: "ElevenLabs",
+  description: "Convert TTS using ElevenLabs",
+  longDescription:
+    "Generate realistic speech from text using ElevenLabs voices.",
+  docsLink: "https://docs.sim.ai/tools/elevenlabs",
+  category: "tools",
+  bgColor: "#181C1E",
   icon: ElevenLabsIcon,
-
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
-      id: 'text',
-      title: 'Text',
-      type: 'long-input',
-      layout: 'full',
-      placeholder: 'Enter the text to convert to speech',
+      id: "text",
+      title: "Text",
+      type: "long-input",
+      layout: "full",
+      placeholder: "Enter the text to convert to speech",
       required: true,
     },
     {
-      id: 'voiceId',
-      title: 'Voice ID',
-      type: 'short-input',
-      layout: 'full',
-      placeholder: 'Enter the voice ID',
+      id: "voiceId",
+      title: "Voice ID",
+      type: "short-input",
+      layout: "full",
+      placeholder: "Enter the voice ID",
       required: true,
     },
     {
-      id: 'modelId',
-      title: 'Model ID',
-      type: 'dropdown',
-      layout: 'half',
+      id: "modelId",
+      title: "Model ID",
+      type: "dropdown",
+      layout: "half",
       options: [
-        { label: 'eleven_monolingual_v1', id: 'eleven_monolingual_v1' },
-        { label: 'eleven_multilingual_v2', id: 'eleven_multilingual_v2' },
-        { label: 'eleven_turbo_v2', id: 'eleven_turbo_v2' },
-        { label: 'eleven_turbo_v2_5', id: 'eleven_turbo_v2_5' },
-        { label: 'eleven_flash_v2_5', id: 'eleven_flash_v2_5' },
+        { label: "eleven_monolingual_v1", id: "eleven_monolingual_v1" },
+        { label: "eleven_multilingual_v2", id: "eleven_multilingual_v2" },
+        { label: "eleven_turbo_v2", id: "eleven_turbo_v2" },
+        { label: "eleven_turbo_v2_5", id: "eleven_turbo_v2_5" },
+        { label: "eleven_flash_v2_5", id: "eleven_flash_v2_5" },
       ],
     },
     {
-      id: 'apiKey',
-      title: 'API Key',
-      type: 'short-input',
-      layout: 'full',
-      placeholder: 'Enter your ElevenLabs API key',
+      id: "apiKey",
+      title: "API Key",
+      type: "short-input",
+      layout: "full",
+      placeholder: "Enter your ElevenLabs API key",
       password: true,
       required: true,
     },
   ],
 
   tools: {
-    access: ['elevenlabs_tts'],
+    access: ["elevenlabs_tts"],
     config: {
-      tool: () => 'elevenlabs_tts',
+      tool: () => "elevenlabs_tts",
       params: (params) => ({
         apiKey: params.apiKey,
         text: params.text,
@@ -67,13 +68,13 @@ export const ElevenLabsBlock: BlockConfig<ElevenLabsBlockResponse> = {
   },
 
   inputs: {
-    text: { type: 'string', description: 'Text to convert' },
-    voiceId: { type: 'string', description: 'Voice identifier' },
-    modelId: { type: 'string', description: 'Model identifier' },
-    apiKey: { type: 'string', description: 'ElevenLabs API key' },
+    text: { type: "string", description: "Text to convert" },
+    voiceId: { type: "string", description: "Voice identifier" },
+    modelId: { type: "string", description: "Model identifier" },
+    apiKey: { type: "string", description: "ElevenLabs API key" },
   },
 
   outputs: {
-    audioUrl: { type: 'string', description: 'Generated audio URL' },
+    audioUrl: { type: "string", description: "Generated audio URL" },
   },
-}
+};

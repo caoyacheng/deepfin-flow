@@ -20,7 +20,7 @@ export const embeddingsTool: ToolConfig<OpenAIEmbeddingsParams> = {
       required: false,
       visibility: "user-only",
       description: "Model to use for embeddings",
-      default: "text-embedding-v4",
+      default: "text-embedding-v1",
     },
     apiKey: {
       type: "string",
@@ -62,16 +62,17 @@ export const embeddingsTool: ToolConfig<OpenAIEmbeddingsParams> = {
   },
   request: {
     method: "POST",
-    url: () => "https://dashscope.aliyuncs.com/compatible-mode/v1/embeddings",
+    url: () =>
+      "https://dashscope.aliyuncs.com/api/v1/services/embeddings/text-embedding-v1/text-embedding",
     headers: (params) => ({
       Authorization: `Bearer ${params.apiKey}`,
       "Content-Type": "application/json",
     }),
     body: (params) => ({
       model: params.model || "text-embedding-v1",
-      input: Array.isArray(params.input) ? params.input : [params.input],
-      dimensions: 1024,
-      encoding_format: "float",
+      input: {
+        texts: Array.isArray(params.input) ? params.input : [params.input],
+      },
     }),
   },
 
@@ -87,16 +88,15 @@ export const embeddingsTool: ToolConfig<OpenAIEmbeddingsParams> = {
     let usage = { prompt_tokens: 0, total_tokens: 0 };
 
     try {
-      // 兼容模式API的响应格式
-      if (data.data && Array.isArray(data.data)) {
-        embeddings = data.data.map((item: any) => item.embedding || item);
-      } else if (data.output && data.output.embeddings) {
+      if (data.output && data.output.embeddings) {
         embeddings = data.output.embeddings.map(
           (item: any) => item.embedding || item
         );
+      } else if (data.data) {
+        embeddings = data.data.map((item: any) => item.embedding || item);
       }
 
-      model = data.model || "unknown";
+      model = data.model || data.output?.model || "unknown";
 
       if (data.usage) {
         usage = {

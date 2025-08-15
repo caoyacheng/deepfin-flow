@@ -1,81 +1,86 @@
-import { S3Icon } from '@/components/icons'
-import type { BlockConfig } from '@/blocks/types'
-import type { S3Response } from '@/tools/s3/types'
+import type { BlockConfig } from "@/blocks/types";
+import { S3Icon } from "@/components/icons";
+import type { S3Response } from "@/tools/s3/types";
 
 export const S3Block: BlockConfig<S3Response> = {
-  type: 's3',
-  name: 'S3',
-  description: 'View S3 files',
-  longDescription: 'Retrieve and view files from Amazon S3 buckets using presigned URLs.',
-  docsLink: 'https://docs.sim.ai/tools/s3',
-  category: 'tools',
-  bgColor: '#E0E0E0',
+  type: "s3",
+  name: "S3",
+  description: "View S3 files",
+  longDescription:
+    "Retrieve and view files from Amazon S3 buckets using presigned URLs.",
+  docsLink: "https://docs.sim.ai/tools/s3",
+  category: "tools",
+  bgColor: "#E0E0E0",
   icon: S3Icon,
+  hideFromToolbar: true,
   subBlocks: [
     {
-      id: 'accessKeyId',
-      title: 'Access Key ID',
-      type: 'short-input',
-      layout: 'full',
-      placeholder: 'Enter your AWS Access Key ID',
+      id: "accessKeyId",
+      title: "Access Key ID",
+      type: "short-input",
+      layout: "full",
+      placeholder: "Enter your AWS Access Key ID",
       password: true,
       required: true,
     },
     {
-      id: 'secretAccessKey',
-      title: 'Secret Access Key',
-      type: 'short-input',
-      layout: 'full',
-      placeholder: 'Enter your AWS Secret Access Key',
+      id: "secretAccessKey",
+      title: "Secret Access Key",
+      type: "short-input",
+      layout: "full",
+      placeholder: "Enter your AWS Secret Access Key",
       password: true,
       required: true,
     },
     {
-      id: 's3Uri',
-      title: 'S3 Object URL',
-      type: 'short-input',
-      layout: 'full',
-      placeholder: 'e.g., https://bucket-name.s3.region.amazonaws.com/path/to/file',
+      id: "s3Uri",
+      title: "S3 Object URL",
+      type: "short-input",
+      layout: "full",
+      placeholder:
+        "e.g., https://bucket-name.s3.region.amazonaws.com/path/to/file",
       required: true,
     },
   ],
   tools: {
-    access: ['s3_get_object'],
+    access: ["s3_get_object"],
     config: {
-      tool: () => 's3_get_object',
+      tool: () => "s3_get_object",
       params: (params) => {
         // Validate required fields
         if (!params.accessKeyId) {
-          throw new Error('Access Key ID is required')
+          throw new Error("Access Key ID is required");
         }
         if (!params.secretAccessKey) {
-          throw new Error('Secret Access Key is required')
+          throw new Error("Secret Access Key is required");
         }
         if (!params.s3Uri) {
-          throw new Error('S3 Object URL is required')
+          throw new Error("S3 Object URL is required");
         }
 
         // Parse S3 URI
         try {
-          const url = new URL(params.s3Uri)
-          const hostname = url.hostname
+          const url = new URL(params.s3Uri);
+          const hostname = url.hostname;
 
           // Extract bucket name from hostname
-          const bucketName = hostname.split('.')[0]
+          const bucketName = hostname.split(".")[0];
 
           // Extract region from hostname
-          const regionMatch = hostname.match(/s3[.-]([^.]+)\.amazonaws\.com/)
-          const region = regionMatch ? regionMatch[1] : 'us-east-1'
+          const regionMatch = hostname.match(/s3[.-]([^.]+)\.amazonaws\.com/);
+          const region = regionMatch ? regionMatch[1] : "us-east-1";
 
           // Extract object key from pathname (remove leading slash)
-          const objectKey = url.pathname.startsWith('/') ? url.pathname.substring(1) : url.pathname
+          const objectKey = url.pathname.startsWith("/")
+            ? url.pathname.substring(1)
+            : url.pathname;
 
           if (!bucketName) {
-            throw new Error('Could not extract bucket name from URL')
+            throw new Error("Could not extract bucket name from URL");
           }
 
           if (!objectKey) {
-            throw new Error('No object key found in URL')
+            throw new Error("No object key found in URL");
           }
 
           return {
@@ -84,22 +89,22 @@ export const S3Block: BlockConfig<S3Response> = {
             region,
             bucketName,
             objectKey,
-          }
+          };
         } catch (_error) {
           throw new Error(
-            'Invalid S3 Object URL format. Expected format: https://bucket-name.s3.region.amazonaws.com/path/to/file'
-          )
+            "Invalid S3 Object URL format. Expected format: https://bucket-name.s3.region.amazonaws.com/path/to/file"
+          );
         }
       },
     },
   },
   inputs: {
-    accessKeyId: { type: 'string', description: 'AWS access key ID' },
-    secretAccessKey: { type: 'string', description: 'AWS secret access key' },
-    s3Uri: { type: 'string', description: 'S3 object URL' },
+    accessKeyId: { type: "string", description: "AWS access key ID" },
+    secretAccessKey: { type: "string", description: "AWS secret access key" },
+    s3Uri: { type: "string", description: "S3 object URL" },
   },
   outputs: {
-    url: { type: 'string', description: 'Presigned URL' },
-    metadata: { type: 'json', description: 'Object metadata' },
+    url: { type: "string", description: "Presigned URL" },
+    metadata: { type: "json", description: "Object metadata" },
   },
-}
+};

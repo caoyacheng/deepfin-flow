@@ -7,7 +7,7 @@ export const ImageGeneratorBlock: BlockConfig<DalleResponse> = {
   name: "图片生成",
   description: "Generate images",
   longDescription:
-    "Create high-quality images using OpenAI's image generation models. Configure resolution, quality, style, and other parameters to get exactly the image you need.",
+    "Create high-quality images using OpenAI's DALL-E and GPT Image models, or Alibaba Cloud's Qwen Image models. Configure resolution, quality, style, and other parameters to get exactly the image you need.",
   docsLink: "https://docs.sim.ai/tools/image_generator",
   category: "tools",
   bgColor: "#4D5FFF",
@@ -15,18 +15,20 @@ export const ImageGeneratorBlock: BlockConfig<DalleResponse> = {
   subBlocks: [
     {
       id: "model",
-      title: "Model",
+      title: "模型",
       type: "dropdown",
       layout: "half",
       options: [
         { label: "DALL-E 3", id: "dall-e-3" },
         { label: "GPT Image", id: "gpt-image-1" },
+        { label: "通义万相 Flash", id: "wan2.2-t2i-flash" },
+        { label: "通义万相 Plus", id: "wan2.2-t2i-plus" },
       ],
       value: () => "dall-e-3",
     },
     {
       id: "prompt",
-      title: "Prompt",
+      title: "提示词",
       type: "long-input",
       layout: "full",
       required: true,
@@ -34,7 +36,7 @@ export const ImageGeneratorBlock: BlockConfig<DalleResponse> = {
     },
     {
       id: "size",
-      title: "Size",
+      title: "尺寸",
       type: "dropdown",
       layout: "half",
       options: [
@@ -47,7 +49,7 @@ export const ImageGeneratorBlock: BlockConfig<DalleResponse> = {
     },
     {
       id: "size",
-      title: "Size",
+      title: "尺寸",
       type: "dropdown",
       layout: "half",
       options: [
@@ -97,20 +99,56 @@ export const ImageGeneratorBlock: BlockConfig<DalleResponse> = {
       condition: { field: "model", value: "gpt-image-1" },
     },
     {
+      id: "size",
+      title: "尺寸",
+      type: "dropdown",
+      layout: "half",
+      options: [
+        { label: "1024*1024", id: "1024*1024" },
+        { label: "1024*1792", id: "1024*1792" },
+        { label: "1792*1024", id: "1792*1024" },
+        { label: "2048*2048", id: "2048*2048" },
+      ],
+      value: () => "1024*1024",
+      condition: { field: "model", value: "wan2.2-t2i-flash" },
+    },
+    {
+      id: "size",
+      title: "尺寸",
+      type: "dropdown",
+      layout: "half",
+      options: [
+        { label: "1024*1024", id: "1024*1024" },
+        { label: "1024*1792", id: "1024*1792" },
+        { label: "1792*1024", id: "1792*1024" },
+        { label: "2048*2048", id: "2048*2048" },
+      ],
+      value: () => "1024*1024",
+      condition: { field: "model", value: "wan2.2-t2i-plus" },
+    },
+    {
       id: "apiKey",
       title: "API Key",
       type: "short-input",
       layout: "full",
       required: true,
-      placeholder: "Enter your OpenAI API key",
+      placeholder: "Enter your API key (OpenAI or Alibaba Cloud DashScope)",
       password: true,
       connectionDroppable: false,
     },
   ],
   tools: {
-    access: ["openai_image"],
+    access: ["openai_image", "qwen_image"],
     config: {
-      tool: () => "openai_image",
+      tool: (params) => {
+        if (
+          params.model === "wan2.2-t2i-flash" ||
+          params.model === "wan2.2-t2i-plus"
+        ) {
+          return "qwen_image";
+        }
+        return "openai_image";
+      },
       params: (params) => {
         if (!params.apiKey) {
           throw new Error("API key is required");
@@ -123,7 +161,7 @@ export const ImageGeneratorBlock: BlockConfig<DalleResponse> = {
         const baseParams = {
           prompt: params.prompt,
           model: params.model || "dall-e-3",
-          size: params.size || "1024x1024",
+          size: params.size || "1024*1024",
           apiKey: params.apiKey,
         };
 
@@ -140,6 +178,15 @@ export const ImageGeneratorBlock: BlockConfig<DalleResponse> = {
             ...(params.background && { background: params.background }),
           };
         }
+        if (
+          params.model === "wan2.2-t2i-flash" ||
+          params.model === "wan2.2-t2i-plus"
+        ) {
+          return {
+            ...baseParams,
+            model: params.model,
+          };
+        }
 
         return baseParams;
       },
@@ -152,7 +199,10 @@ export const ImageGeneratorBlock: BlockConfig<DalleResponse> = {
     quality: { type: "string", description: "Image quality level" },
     style: { type: "string", description: "Image style" },
     background: { type: "string", description: "Background type" },
-    apiKey: { type: "string", description: "OpenAI API key" },
+    apiKey: {
+      type: "string",
+      description: "API key (OpenAI or Alibaba Cloud DashScope)",
+    },
   },
   outputs: {
     content: { type: "string", description: "Generation response" },

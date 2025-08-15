@@ -9,7 +9,7 @@ export const FileBlock: BlockConfig<FileParserOutput> = {
   type: "file",
   name: "文件",
   description: "Read and parse multiple files",
-  longDescription: `Upload and extract contents from structured file formats including PDFs, CSV spreadsheets, and Word documents (DOCX). You can either provide a URL to a file or upload files directly. Specialized parsers extract text and metadata from each format. You can upload multiple files at once and access them individually or as a combined document.`,
+  longDescription: `上传并提取结构化文件格式（包括 PDF、CSV 表格和 Word 文档（DOCX））的内容。您可以提供文件的 URL，或直接上传文件。针对每种格式有专门的解析器，用于提取文本和元数据。支持一次上传多个文件，可分别访问每个文件，也可将其作为一个合并文档进行处理。`,
   docsLink: "https://docs.sim.ai/tools/file",
   category: "tools",
   bgColor: "#40916C",
@@ -17,20 +17,20 @@ export const FileBlock: BlockConfig<FileParserOutput> = {
   subBlocks: [
     {
       id: "inputMethod",
-      title: "Select Input Method",
+      title: "选择输入方式",
       type: "dropdown" as SubBlockType,
       layout: "full" as SubBlockLayout,
       options: [
-        { id: "url", label: "File URL" },
-        { id: "upload", label: "Upload Files" },
+        { id: "url", label: "文件 URL" },
+        { id: "upload", label: "上传文件" },
       ],
     },
     {
       id: "filePath",
-      title: "File URL",
+      title: "文件 URL",
       type: "short-input" as SubBlockType,
       layout: "full" as SubBlockLayout,
-      placeholder: "Enter URL to a file (https://example.com/document.pdf)",
+      placeholder: "输入文件的 URL（例如：https://example.com/document.pdf）",
       condition: {
         field: "inputMethod",
         value: "url",
@@ -39,7 +39,7 @@ export const FileBlock: BlockConfig<FileParserOutput> = {
 
     {
       id: "file",
-      title: "Upload Files",
+      title: "上传文件",
       type: "file-upload" as SubBlockType,
       layout: "full" as SubBlockLayout,
       acceptedTypes: ".pdf,.csv,.docx",

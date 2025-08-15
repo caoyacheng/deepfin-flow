@@ -1,4 +1,5 @@
 import { createLogger } from "@/lib/logs/console/logger";
+import { OSS_CONFIG } from "@/lib/uploads/setup";
 import OSS from "ali-oss";
 import type { CustomOSSConfig } from "./types";
 

@@ -1,3 +1,10 @@
+import {
+  createErrorResponse,
+  createFileResponse,
+  FileNotFoundError,
+  findLocalFile,
+  getContentType,
+} from "@/app/api/files/utils";
 import { createLogger } from "@/lib/logs/console/logger";
 import {
   downloadFile,
@@ -8,14 +15,6 @@ import { BLOB_KB_CONFIG, S3_KB_CONFIG } from "@/lib/uploads/setup";
 import "@/lib/uploads/setup.server";
 import { readFile } from "fs/promises";
 import type { NextRequest, NextResponse } from "next/server";
-
-import {
-  createErrorResponse,
-  createFileResponse,
-  FileNotFoundError,
-  findLocalFile,
-  getContentType,
-} from "@/app/api/files/utils";
 
 const logger = createLogger("FilesServeAPI");
 
@@ -61,7 +60,7 @@ export async function GET(
 
     // Use cloud handler if in production, path explicitly specifies cloud storage, or we're using cloud storage
     if (isUsingCloudStorage() || isCloudPath) {
-      // Extract the actual key (remove 's3/' or 'blob/' prefix if present)
+      // Extract the actual key (remove 's3/', 'blob/', or 'oss/' prefix if present)
       const cloudKey = isCloudPath ? path.slice(1).join("/") : fullPath;
 
       // Get bucket type from query parameter
