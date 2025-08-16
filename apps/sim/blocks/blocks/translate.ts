@@ -27,23 +27,23 @@ export const TranslateBlock: BlockConfig = {
   subBlocks: [
     {
       id: "context",
-      title: "Text to Translate",
+      title: "待翻译文本",
       type: "long-input",
       layout: "full",
-      placeholder: "Enter the text you want to translate",
+      placeholder: "输入待翻译文本",
       required: true,
     },
     {
       id: "targetLanguage",
-      title: "Translate To",
+      title: "翻译目标语言",
       type: "short-input",
       layout: "full",
-      placeholder: "Enter language (e.g. Spanish, French, etc.)",
+      placeholder: "输入翻译目标语言 (e.g. 西班牙语, 法语, 等)",
       required: true,
     },
     {
       id: "model",
-      title: "Model",
+      title: "模型",
       type: "dropdown",
       layout: "half",
       options: Object.keys(getBaseModelProviders()).map((key) => ({
@@ -57,7 +57,7 @@ export const TranslateBlock: BlockConfig = {
       title: "API Key",
       type: "short-input",
       layout: "full",
-      placeholder: "Enter your API key",
+      placeholder: "输入你的 API key",
       password: true,
       connectionDroppable: false,
       required: true,

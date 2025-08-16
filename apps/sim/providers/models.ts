@@ -712,6 +712,19 @@ export const PROVIDER_DEFINITIONS: Record<string, ProviderDefinition> = {
           toolUsageControl: true,
         },
       },
+      {
+        id: "qwen-vl-plus",
+        pricing: {
+          input: 1.0,
+          output: 2.0,
+          updatedAt: "2025-01-20",
+        },
+        capabilities: {
+          temperature: { min: 0, max: 2 },
+          toolUsageControl: true,
+          vision: true,
+        },
+      },
     ],
   },
   kimi: {

@@ -10,7 +10,7 @@ export const ImageGeneratorBlock: BlockConfig<DalleResponse> = {
     "Create high-quality images using OpenAI's DALL-E and GPT Image models, or Alibaba Cloud's Qwen Image models. Configure resolution, quality, style, and other parameters to get exactly the image you need.",
   docsLink: "https://docs.sim.ai/tools/image_generator",
   category: "tools",
-  bgColor: "#4D5FFF",
+  bgColor: "#5A4DFF",
   icon: ImageIcon,
   subBlocks: [
     {
@@ -19,8 +19,8 @@ export const ImageGeneratorBlock: BlockConfig<DalleResponse> = {
       type: "dropdown",
       layout: "half",
       options: [
-        { label: "DALL-E 3", id: "dall-e-3" },
-        { label: "GPT Image", id: "gpt-image-1" },
+        // { label: "DALL-E 3", id: "dall-e-3" },
+        // { label: "GPT Image", id: "gpt-image-1" },
         { label: "通义万相 Flash", id: "wan2.2-t2i-flash" },
         { label: "通义万相 Plus", id: "wan2.2-t2i-plus" },
       ],
@@ -32,7 +32,7 @@ export const ImageGeneratorBlock: BlockConfig<DalleResponse> = {
       type: "long-input",
       layout: "full",
       required: true,
-      placeholder: "Describe the image you want to generate...",
+      placeholder: "描述你想生成的图片",
     },
     {
       id: "size",

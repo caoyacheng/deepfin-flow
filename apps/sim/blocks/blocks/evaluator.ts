@@ -167,34 +167,42 @@ export const EvaluatorBlock: BlockConfig<EvaluatorResponse> = {
     "使用可自定义的评估指标和评分标准对内容质量进行评估。创建客观的评估框架，使用数值评分来衡量在多个维度上的性能。",
   docsLink: "https://docs.sim.ai/blocks/evaluator",
   category: "tools",
-  bgColor: "#4D5FFF",
+  bgColor: "#22C55E",
   icon: ChartBarIcon,
   subBlocks: [
     {
       id: "metrics",
-      title: "Evaluation Metrics",
+      title: "指标评估",
       type: "eval-input",
       layout: "full",
       required: true,
     },
     {
       id: "content",
-      title: "Content",
+      title: "内容",
       type: "short-input",
       layout: "full",
-      placeholder: "Enter the content to evaluate",
+      placeholder: "输入要评估的内容",
       required: true,
     },
     {
       id: "model",
-      title: "Model",
+      title: "模型",
       type: "dropdown",
       layout: "half",
       required: true,
       options: () => {
         const ollamaModels = useOllamaStore.getState().models;
         const baseModels = Object.keys(getBaseModelProviders());
-        return [...baseModels, ...ollamaModels].map((model) => ({
+
+        // 过滤掉 gpt 和 grok 模型
+        const filteredModels = [...baseModels, ...ollamaModels].filter(
+          (model) =>
+            !model.toLowerCase().includes("gpt") &&
+            !model.toLowerCase().includes("grok")
+        );
+
+        return filteredModels.map((model) => ({
           label: model,
           id: model,
         }));
@@ -205,7 +213,7 @@ export const EvaluatorBlock: BlockConfig<EvaluatorResponse> = {
       title: "API Key",
       type: "short-input",
       layout: "full",
-      placeholder: "Enter your API key",
+      placeholder: "输入你的API密钥",
       password: true,
       connectionDroppable: false,
       required: true,

@@ -1,8 +1,3 @@
-import type React from 'react'
-import { useEffect, useState } from 'react'
-import { AlertTriangle, Info } from 'lucide-react'
-import { Label, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui'
-import { cn } from '@/lib/utils'
 import {
   ChannelSelectorInput,
   CheckboxList,
@@ -31,19 +26,29 @@ import {
   ToolInput,
   TriggerConfig,
   WebhookConfig,
-} from '@/app/workspace/[workspaceId]/w/[workflowId]/components/workflow-block/components/sub-block/components'
-import type { SubBlockConfig } from '@/blocks/types'
-import { DocumentTagEntry } from './components/document-tag-entry/document-tag-entry'
-import { KnowledgeTagFilters } from './components/knowledge-tag-filters/knowledge-tag-filters'
+} from "@/app/workspace/[workspaceId]/w/[workflowId]/components/workflow-block/components/sub-block/components";
+import type { SubBlockConfig } from "@/blocks/types";
+import {
+  Label,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui";
+import { cn } from "@/lib/utils";
+import { AlertTriangle, Info } from "lucide-react";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { DocumentTagEntry } from "./components/document-tag-entry/document-tag-entry";
+import { KnowledgeTagFilters } from "./components/knowledge-tag-filters/knowledge-tag-filters";
 
 interface SubBlockProps {
-  blockId: string
-  config: SubBlockConfig
-  isConnecting: boolean
-  isPreview?: boolean
-  subBlockValues?: Record<string, any>
-  disabled?: boolean
-  fieldDiffStatus?: 'changed' | 'unchanged'
+  blockId: string;
+  config: SubBlockConfig;
+  isConnecting: boolean;
+  isPreview?: boolean;
+  subBlockValues?: Record<string, any>;
+  disabled?: boolean;
+  fieldDiffStatus?: "changed" | "unchanged";
 }
 
 export function SubBlock({
@@ -55,40 +60,40 @@ export function SubBlock({
   disabled = false,
   fieldDiffStatus,
 }: SubBlockProps) {
-  const [isValidJson, setIsValidJson] = useState(true)
+  const [isValidJson, setIsValidJson] = useState(true);
 
   // Debug field diff status
   useEffect(() => {
     if (fieldDiffStatus) {
-      console.log(`[SubBlock ${config.id}] fieldDiffStatus:`, fieldDiffStatus)
+      console.log(`[SubBlock ${config.id}] fieldDiffStatus:`, fieldDiffStatus);
     }
-  }, [fieldDiffStatus, config.id])
+  }, [fieldDiffStatus, config.id]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    e.stopPropagation()
-  }
+    e.stopPropagation();
+  };
 
   const handleValidationChange = (isValid: boolean) => {
-    setIsValidJson(isValid)
-  }
+    setIsValidJson(isValid);
+  };
 
   const isFieldRequired = () => {
-    return config.required === true
-  }
+    return config.required === true;
+  };
 
   // Get preview value for this specific sub-block
   const getPreviewValue = () => {
-    if (!isPreview || !subBlockValues) return undefined
-    return subBlockValues[config.id]?.value ?? null
-  }
+    if (!isPreview || !subBlockValues) return undefined;
+    return subBlockValues[config.id]?.value ?? null;
+  };
 
   const renderInput = () => {
-    const previewValue = getPreviewValue()
+    const previewValue = getPreviewValue();
     // Disable input if explicitly disabled or in preview mode
-    const isDisabled = disabled || isPreview
+    const isDisabled = disabled || isPreview;
 
     switch (config.type) {
-      case 'short-input':
+      case "short-input":
         return (
           <ShortInput
             blockId={blockId}
@@ -101,8 +106,8 @@ export function SubBlock({
             previewValue={previewValue}
             disabled={isDisabled}
           />
-        )
-      case 'long-input':
+        );
+      case "long-input":
         return (
           <LongInput
             blockId={blockId}
@@ -115,8 +120,8 @@ export function SubBlock({
             previewValue={previewValue}
             disabled={isDisabled}
           />
-        )
-      case 'dropdown':
+        );
+      case "dropdown":
         return (
           <div onMouseDown={handleMouseDown}>
             <Dropdown
@@ -128,8 +133,8 @@ export function SubBlock({
               disabled={isDisabled}
             />
           </div>
-        )
-      case 'combobox':
+        );
+      case "combobox":
         return (
           <div onMouseDown={handleMouseDown}>
             <ComboBox
@@ -144,23 +149,25 @@ export function SubBlock({
               config={config}
             />
           </div>
-        )
-      case 'slider':
+        );
+      case "slider":
         return (
           <SliderInput
             blockId={blockId}
             subBlockId={config.id}
             min={config.min}
             max={config.max}
-            defaultValue={(config.min || 0) + ((config.max || 100) - (config.min || 0)) / 2}
+            defaultValue={
+              (config.min || 0) + ((config.max || 100) - (config.min || 0)) / 2
+            }
             step={config.step}
             integer={config.integer}
             isPreview={isPreview}
             previewValue={previewValue}
             disabled={isDisabled}
           />
-        )
-      case 'table':
+        );
+      case "table":
         return (
           <Table
             blockId={blockId}
@@ -170,8 +177,8 @@ export function SubBlock({
             previewValue={previewValue}
             disabled={isDisabled}
           />
-        )
-      case 'code':
+        );
+      case "code":
         return (
           <Code
             blockId={blockId}
@@ -187,24 +194,24 @@ export function SubBlock({
             wandConfig={
               config.wandConfig || {
                 enabled: false,
-                prompt: '',
-                placeholder: '',
+                prompt: "",
+                placeholder: "",
               }
             }
           />
-        )
-      case 'switch':
+        );
+      case "switch":
         return (
           <Switch
             blockId={blockId}
             subBlockId={config.id}
-            title={config.title ?? ''}
+            title={config.title ?? ""}
             isPreview={isPreview}
             previewValue={previewValue}
             disabled={isDisabled}
           />
-        )
-      case 'tool-input':
+        );
+      case "tool-input":
         return (
           <ToolInput
             blockId={blockId}
@@ -213,21 +220,21 @@ export function SubBlock({
             previewValue={previewValue}
             disabled={isDisabled}
           />
-        )
-      case 'checkbox-list':
+        );
+      case "checkbox-list":
         return (
           <CheckboxList
             blockId={blockId}
             subBlockId={config.id}
-            title={config.title ?? ''}
+            title={config.title ?? ""}
             options={config.options as { label: string; id: string }[]}
             layout={config.layout}
             isPreview={isPreview}
             subBlockValues={subBlockValues}
             disabled={isDisabled}
           />
-        )
-      case 'condition-input':
+        );
+      case "condition-input":
         return (
           <ConditionInput
             blockId={blockId}
@@ -237,8 +244,8 @@ export function SubBlock({
             previewValue={previewValue}
             disabled={isDisabled}
           />
-        )
-      case 'eval-input':
+        );
+      case "eval-input":
         return (
           <EvalInput
             blockId={blockId}
@@ -247,8 +254,8 @@ export function SubBlock({
             previewValue={previewValue}
             disabled={isDisabled}
           />
-        )
-      case 'date-input':
+        );
+      case "date-input":
         return (
           <DateInput
             blockId={blockId}
@@ -258,8 +265,8 @@ export function SubBlock({
             previewValue={previewValue}
             disabled={isDisabled}
           />
-        )
-      case 'time-input':
+        );
+      case "time-input":
         return (
           <TimeInput
             blockId={blockId}
@@ -269,21 +276,21 @@ export function SubBlock({
             previewValue={previewValue}
             disabled={isDisabled}
           />
-        )
-      case 'file-upload':
+        );
+      case "file-upload":
         return (
           <FileUpload
             blockId={blockId}
             subBlockId={config.id}
-            acceptedTypes={config.acceptedTypes || '*'}
+            acceptedTypes={config.acceptedTypes || "*"}
             multiple={config.multiple === true}
             maxSize={config.maxSize}
             isPreview={isPreview}
             previewValue={previewValue}
             disabled={isDisabled}
           />
-        )
-      case 'webhook-config': {
+        );
+      case "webhook-config": {
         // For webhook config, we need to construct the value from multiple subblock values
         const webhookValue =
           isPreview && subBlockValues
@@ -292,7 +299,7 @@ export function SubBlock({
                 webhookPath: subBlockValues.webhookPath?.value,
                 providerConfig: subBlockValues.providerConfig?.value,
               }
-            : previewValue
+            : previewValue;
 
         return (
           <WebhookConfig
@@ -303,9 +310,9 @@ export function SubBlock({
             value={webhookValue}
             disabled={isDisabled}
           />
-        )
+        );
       }
-      case 'trigger-config': {
+      case "trigger-config": {
         // For trigger config, we need to construct the value from multiple subblock values
         const triggerValue =
           isPreview && subBlockValues
@@ -314,7 +321,7 @@ export function SubBlock({
                 triggerPath: subBlockValues.triggerPath?.value,
                 triggerConfig: subBlockValues.triggerConfig?.value,
               }
-            : previewValue
+            : previewValue;
         return (
           <TriggerConfig
             blockId={blockId}
@@ -324,9 +331,9 @@ export function SubBlock({
             disabled={isDisabled}
             availableTriggers={config.availableTriggers}
           />
-        )
+        );
       }
-      case 'schedule-config':
+      case "schedule-config":
         return (
           <ScheduleConfig
             blockId={blockId}
@@ -336,8 +343,8 @@ export function SubBlock({
             previewValue={previewValue}
             disabled={isDisabled}
           />
-        )
-      case 'oauth-input':
+        );
+      case "oauth-input":
         return (
           <CredentialSelector
             blockId={blockId}
@@ -346,8 +353,8 @@ export function SubBlock({
             isPreview={isPreview}
             previewValue={previewValue}
           />
-        )
-      case 'file-selector':
+        );
+      case "file-selector":
         return (
           <FileSelectorInput
             blockId={blockId}
@@ -356,8 +363,8 @@ export function SubBlock({
             isPreview={isPreview}
             previewValue={previewValue}
           />
-        )
-      case 'project-selector':
+        );
+      case "project-selector":
         return (
           <ProjectSelectorInput
             blockId={blockId}
@@ -366,8 +373,8 @@ export function SubBlock({
             isPreview={isPreview}
             previewValue={previewValue}
           />
-        )
-      case 'folder-selector':
+        );
+      case "folder-selector":
         return (
           <FolderSelectorInput
             blockId={blockId}
@@ -376,8 +383,8 @@ export function SubBlock({
             isPreview={isPreview}
             previewValue={previewValue}
           />
-        )
-      case 'knowledge-base-selector':
+        );
+      case "knowledge-base-selector":
         return (
           <KnowledgeBaseSelector
             blockId={blockId}
@@ -386,8 +393,8 @@ export function SubBlock({
             isPreview={isPreview}
             previewValue={previewValue}
           />
-        )
-      case 'knowledge-tag-filters':
+        );
+      case "knowledge-tag-filters":
         return (
           <KnowledgeTagFilters
             blockId={blockId}
@@ -397,9 +404,9 @@ export function SubBlock({
             previewValue={previewValue}
             isConnecting={isConnecting}
           />
-        )
+        );
 
-      case 'document-tag-entry':
+      case "document-tag-entry":
         return (
           <DocumentTagEntry
             blockId={blockId}
@@ -409,8 +416,8 @@ export function SubBlock({
             previewValue={previewValue}
             isConnecting={isConnecting}
           />
-        )
-      case 'document-selector':
+        );
+      case "document-selector":
         return (
           <DocumentSelector
             blockId={blockId}
@@ -419,8 +426,8 @@ export function SubBlock({
             isPreview={isPreview}
             previewValue={previewValue}
           />
-        )
-      case 'input-format': {
+        );
+      case "input-format": {
         return (
           <InputFormat
             blockId={blockId}
@@ -431,9 +438,9 @@ export function SubBlock({
             isConnecting={isConnecting}
             config={config}
           />
-        )
+        );
       }
-      case 'response-format':
+      case "response-format":
         return (
           <ResponseFormat
             blockId={blockId}
@@ -444,8 +451,8 @@ export function SubBlock({
             config={config}
             disabled={isDisabled}
           />
-        )
-      case 'channel-selector':
+        );
+      case "channel-selector":
         return (
           <ChannelSelectorInput
             blockId={blockId}
@@ -454,57 +461,64 @@ export function SubBlock({
             isPreview={isPreview}
             previewValue={previewValue}
           />
-        )
+        );
       default:
-        return <div>Unknown input type: {config.type}</div>
+        return <div>Unknown input type: {config.type}</div>;
     }
-  }
+  };
 
-  const required = isFieldRequired()
+  const required = isFieldRequired();
 
   return (
     <div
       className={cn(
-        'space-y-[6px] pt-[2px]',
+        "space-y-[6px] pt-[2px]",
         // Field-level diff highlighting - make it more prominent for testing
-        fieldDiffStatus === 'changed' &&
-          '-m-1 rounded-lg border border-orange-200 bg-orange-100 p-3 ring-2 ring-orange-500 dark:border-orange-800 dark:bg-orange-900/40'
+        fieldDiffStatus === "changed" &&
+          "-m-1 rounded-lg border border-orange-200 bg-orange-100 p-3 ring-2 ring-orange-500 dark:border-orange-800 dark:bg-orange-900/40"
       )}
       onMouseDown={handleMouseDown}
     >
-      {config.type !== 'switch' && (
-        <Label className='flex items-center gap-1'>
+      {config.type !== "switch" && (
+        <Label className="flex items-center gap-1">
           {config.title}
           {required && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className='cursor-help text-red-500'>*</span>
+                <span className="cursor-help text-red-500">*</span>
               </TooltipTrigger>
-              <TooltipContent side='top'>
-                <p>This field is required</p>
+              <TooltipContent side="top">
+                <p>此字段为必填项</p>
               </TooltipContent>
             </Tooltip>
           )}
-          {config.id === 'responseFormat' && !isValidJson && (
+          {config.id === "responseFormat" && !isValidJson && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <AlertTriangle className='h-4 w-4 cursor-pointer text-destructive' />
+                <AlertTriangle className="h-4 w-4 cursor-pointer text-destructive" />
               </TooltipTrigger>
-              <TooltipContent side='top'>
-                <p>Invalid JSON</p>
+              <TooltipContent side="top">
+                <p>JSON 格式错误</p>
               </TooltipContent>
             </Tooltip>
           )}
           {config.description && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Info className='h-4 w-4 cursor-pointer text-muted-foreground' />
+                <Info className="h-4 w-4 cursor-pointer text-muted-foreground" />
               </TooltipTrigger>
-              <TooltipContent side='top' className='max-w-[400px] select-text whitespace-pre-wrap'>
-                {config.description.split('\n').map((line, idx) => (
+              <TooltipContent
+                side="top"
+                className="max-w-[400px] select-text whitespace-pre-wrap"
+              >
+                {config.description.split("\n").map((line, idx) => (
                   <p
                     key={idx}
-                    className={idx === 0 ? 'mb-1 text-sm' : 'text-muted-foreground text-xs'}
+                    className={
+                      idx === 0
+                        ? "mb-1 text-sm"
+                        : "text-muted-foreground text-xs"
+                    }
                   >
                     {line}
                   </p>
@@ -516,5 +530,5 @@ export function SubBlock({
       )}
       {renderInput()}
     </div>
-  )
+  );
 }

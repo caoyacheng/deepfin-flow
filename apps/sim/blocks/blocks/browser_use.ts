@@ -12,6 +12,7 @@ export const BrowserUseBlock: BlockConfig<BrowserUseResponse> = {
   category: "tools",
   bgColor: "#E0E0E0",
   icon: BrowserUseIcon,
+  hideFromToolbar: true, //隐藏工具栏
   subBlocks: [
     {
       id: "task",
